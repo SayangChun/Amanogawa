@@ -1,0 +1,30 @@
+{
+  "name": "天之川沙夜",
+  "short_name": "沙夜",
+  "description": "《仰望夜空的星辰》天之川沙夜个人展示站",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050a18",
+  "theme_color": "#050a18",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
