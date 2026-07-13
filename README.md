@@ -56,6 +56,8 @@ src/
 ## 来源说明
 
 - 官方立绘 / CG：PULLTOP《見上げてごらん、夜空の星を》官网公开素材
+- IF 换装立绘 / 宣传图：PULLTOP《Interstellar Focus》官网公开素材
 - 部分设定图：Bangumi 角色页
+- 低分辨率素材经 LANCZOS 放大与锐化后入库（见 `scripts/process_official_images.py`）
 - 图集仅收录全年龄向内容（已排除 H / 裸露等 18+ 场景）
 - 仅供个人欣赏的同人向展示，请勿商业使用
