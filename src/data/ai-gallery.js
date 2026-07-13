@@ -8,11 +8,11 @@
  * { id, title, caption, src: "./assets/gallery/ai/your.png" }
  */
 export const aiGalleryManual = [
-  // 示例（取消注释并改路径即可）：
-  // {
-  //   id: "ai-01",
-  //   title: "星夜侧脸",
-  //   caption: "用 AI 画的沙夜 · 个人创作",
-  //   src: "./assets/gallery/ai/starlight-saya.png",
-  // },
+  {
+    id: "ai-海边汽水",
+    title: "海边的蓝色汽水",
+    caption: "制服坐在沙滩凉亭，异色瞳映着海与汽水的蓝。",
+    alt: "海边的蓝色汽水",
+    src: "./assets/gallery/ai/海边汽水.png",
+  },
 ];

@@ -24,23 +24,56 @@ let allItems = [];
 let visibleItems = [];
 let activeFilter = "all";
 
+function fileBasename(src) {
+  try {
+    return decodeURIComponent((src || "").split("/").pop() || "");
+  } catch {
+    return (src || "").split("/").pop() || "";
+  }
+}
+
+/** 从文件名生成标题，并去掉不该出现在标题里的字样 */
 function titleFromFilename(name) {
-  return name
-    .replace(/\.[^.]+$/, "")
-    .replace(/[_-]+/g, " ")
+  return cleanDisplayTitle(
+    name
+      .replace(/\.[^.]+$/, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
+}
+
+/** 标题/展示文案：不要出现 AI、天之川沙夜 等 */
+function cleanDisplayTitle(title) {
+  return String(title || "")
+    .replace(/天之川沙夜/g, "")
+    .replace(/\bAI\b/gi, "")
+    .replace(/个人\s*创作/g, "")
+    .replace(/[·•|｜/／]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+function manualAiByFilename() {
+  const map = new Map();
+  for (const item of aiGalleryManual) {
+    const key = fileBasename(item.src);
+    if (key) map.set(key, item);
+  }
+  return map;
+}
+
 function normalizeAiItem(raw, index) {
   const src = raw.src || raw.url || "";
-  const file = src.split("/").pop() || `ai-${index + 1}`;
-  const title = raw.title || titleFromFilename(file);
+  const file = fileBasename(src) || `item-${index + 1}`;
+  const title =
+    cleanDisplayTitle(raw.title) || titleFromFilename(file) || "未命名";
+  const caption = String(raw.caption || "").trim();
   return {
     id: raw.id || `ai-${index + 1}-${file}`,
     title,
-    caption: raw.caption || "个人 AI 创作 · 天之川沙夜",
-    alt: raw.alt || `${title} · AI`,
+    caption,
+    alt: raw.alt || title,
     source: "ai",
     badge: "AI 创作",
     src,
@@ -48,14 +81,46 @@ function normalizeAiItem(raw, index) {
   };
 }
 
+/**
+ * 扫描结果与 ai-gallery.js 按文件名合并：
+ * 清单里的 title / caption 优先，保证浏览页能看到说明。
+ */
+function mergeScannedWithManual(scanned) {
+  const manualMap = manualAiByFilename();
+  const used = new Set();
+
+  const fromScan = scanned.map((item, i) => {
+    const file = fileBasename(item.src || item.url || "");
+    const manual = manualMap.get(file);
+    if (manual) used.add(file);
+    return normalizeAiItem(
+      {
+        ...item,
+        ...(manual || {}),
+        // 始终以磁盘扫描路径为准，避免清单路径过期
+        src: item.src || item.url || manual?.src,
+        thumb: item.thumb || manual?.thumb,
+      },
+      i,
+    );
+  });
+
+  // 清单里多出来的（例如 API 未扫到）也保留
+  const extras = aiGalleryManual
+    .filter((item) => !used.has(fileBasename(item.src)))
+    .map((item, i) => normalizeAiItem(item, fromScan.length + i));
+
+  return [...fromScan, ...extras];
+}
+
 async function loadAiItems() {
-  // 1) 本地 server 自动扫描
+  // 1) 本地 server 自动扫描 + 手动元数据
   try {
     const res = await fetch("/api/ai-images", { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.images) && data.images.length) {
-        return data.images.map((item, i) => normalizeAiItem(item, i));
+        return mergeScannedWithManual(data.images);
       }
     }
   } catch {

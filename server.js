@@ -41,8 +41,9 @@ async function listAiImages() {
       .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
       .map((name) => ({
         id: `ai-${name}`,
+        // 标题/说明由前端合并 ai-gallery.js；此处只提供扫描到的路径
         title: name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "),
-        caption: "个人 AI 创作 · 天之川沙夜",
+        caption: "",
         src: `./assets/gallery/ai/${name}`,
       }));
     return images;

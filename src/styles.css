@@ -1425,14 +1425,15 @@ button {
 .archive-card figcaption {
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
   padding: 14px 14px 16px;
-  background: linear-gradient(180deg, transparent, rgba(4, 8, 20, 0.72) 18%, rgba(4, 8, 20, 0.92));
-  margin-top: -40px;
+  background: linear-gradient(180deg, rgba(4, 8, 20, 0.55), rgba(4, 8, 20, 0.94));
+  margin-top: -48px;
 }
 
 .archive-card figcaption strong {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-family: var(--font-serif);
   font-size: 1.02rem;
 }
@@ -1442,6 +1443,15 @@ button {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.55;
+  /* 保证说明在卡片上始终可见，最多约 3 行 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.archive-card figcaption p:empty {
+  display: none;
 }
 
 .archive-card[data-source="ai"] {
