@@ -4,6 +4,7 @@
   "framework": null,
   "rewrites": [
     { "source": "/gallery", "destination": "/gallery.html" },
-    { "source": "/quotes", "destination": "/quotes.html" }
+    { "source": "/quotes", "destination": "/quotes.html" },
+    { "source": "/companion", "destination": "/companion.html" }
   ]
 }

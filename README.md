@@ -12,6 +12,11 @@
 - **完整星语页** `quotes.html`
   - 沙夜台词 / 关于她 / 星空名句
   - 标注来源，可按分类筛选
+- **陪伴页** `companion.html`
+  - 按时段问候（晨 / 午 / 傍晚 / 夜 / 深夜）
+  - 随机星语气泡、一起看星星计时
+  - 回访连续天数（本机 localStorage）
+  - 分支小对话（气质整理向，非剧本逐字）
 
 ## 运行
 
@@ -22,6 +27,7 @@ npm start
 - 首页：http://localhost:3000/
 - 图集：http://localhost:3000/gallery.html
 - 星语：http://localhost:3000/quotes.html
+- 陪伴：http://localhost:3000/companion.html
 
 ## 添加你的 AI 图
 
@@ -37,6 +43,8 @@ npm start
 ```
 index.html              首页
 gallery.html            完整图集
+quotes.html             完整星语
+companion.html          陪伴
 server.js               本地静态服务 + AI 图扫描 API
 assets/gallery/
   official/             官方图片缓存
@@ -44,6 +52,8 @@ assets/gallery/
 src/
   main.js               首页逻辑
   gallery-page.js       图集页逻辑
+  quotes-page.js        星语页逻辑
+  companion-page.js     陪伴页逻辑
   shared.js             星空 / 灯箱 / 导航共用
   styles.css
   data/
@@ -51,6 +61,7 @@ src/
     gallery-archive.js  官方图清单 + 首页精选
     ai-gallery.js       AI 图手动清单（可选）
     quotes.js / notes.js
+    companion.js        陪伴文案与小对话
 ```
 
 ## 来源说明

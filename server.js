@@ -27,6 +27,7 @@ const mimeTypes = new Map([
 const REWRITES = [
   { source: "/gallery", destination: "/gallery.html" },
   { source: "/quotes", destination: "/quotes.html" },
+  { source: "/companion", destination: "/companion.html" },
 ];
 
 const AI_DIR = path.join(__dirname, "assets", "gallery", "ai");

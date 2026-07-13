@@ -206,6 +206,7 @@ export function renderSiteHeader({ active = "home", base = "." } = {}) {
   const home = `${base}/index.html`;
   const gallery = `${base}/gallery.html`;
   const quotes = `${base}/quotes.html`;
+  const companion = `${base}/companion.html`;
   return `
   <header class="site-header" id="top">
     <a class="brand" href="${home}">
@@ -223,6 +224,7 @@ export function renderSiteHeader({ active = "home", base = "." } = {}) {
       <a href="${home}#profile" data-nav="profile">档案</a>
       <a href="${gallery}" data-nav="gallery" class="${active === "gallery" ? "is-current" : ""}">图集</a>
       <a href="${quotes}" data-nav="quotes" class="${active === "quotes" ? "is-current" : ""}">星语</a>
+      <a href="${companion}" data-nav="companion" class="${active === "companion" ? "is-current" : ""}">陪伴</a>
       <a href="${home}#notes" data-nav="notes">备注</a>
     </nav>
   </header>`;
@@ -240,14 +242,14 @@ export function renderSiteFooter(saya) {
     </div>
     <p class="footer-title">${esc(saya.name)}</p>
     <p class="footer-sub">${esc(saya.series)} · ${esc(saya.nameRomaji)}</p>
-    <p class="footer-hint">以后或许会加入陪伴功能。今晚，先一起看看星星吧。</p>
+    <p class="footer-hint">陪伴页已就绪——想静一静的时候，去那里一起看星星吧。</p>
     <p class="footer-credit">Fan tribute · 官方图源自 PULLTOP / Bangumi · 仅供个人欣赏</p>
   </footer>`;
 }
 
 export function bindReveal(root = document) {
   const revealables = root.querySelectorAll(
-    ".section, .trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint",
+    ".section, .trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue",
   );
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver(
