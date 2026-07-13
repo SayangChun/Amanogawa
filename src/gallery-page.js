@@ -132,13 +132,14 @@ function renderCards(items) {
       ${items
         .map(
           (item, index) => `
-        <figure class="archive-card" data-source="${esc(item.source)}" data-index="${index}">
+        <figure class="archive-card" data-source="${esc(item.source)}" data-id="${esc(item.id || "")}" data-index="${index}">
           <button type="button" class="archive-open" data-index="${index}" aria-label="查看 ${esc(item.title)}">
             <img
               src="${imgSrc(item.thumb || item.src, item.title)}"
               alt="${esc(item.alt || item.title)}"
               loading="lazy"
               data-fallback="${esc(item.title)}"
+              ${item.objectPosition ? `style="object-position: ${esc(item.objectPosition)}"` : ""}
             />
             <span class="archive-zoom" aria-hidden="true">查看</span>
           </button>

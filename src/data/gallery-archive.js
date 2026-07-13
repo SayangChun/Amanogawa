@@ -122,12 +122,14 @@ export const officialArchive = [
   {
     id: "art-mv",
     title: "主视觉",
-    caption: "游戏官方主视觉。仰望夜空的那一刻。",
-    alt: "仰望夜空的星辰 · 主视觉",
+    caption: "游戏官方主视觉。仰望夜空的那一刻——预览对准左侧的沙夜。",
+    alt: "仰望夜空的星辰 · 主视觉（天之川沙夜）",
     source: "official-art",
     badge: "官方主视觉",
     src: `${O}/mainvisual.jpg`,
     thumb: `${O}/mainvisual.jpg`,
+    // 全图为多人构图；预览裁切对准左侧银发异瞳的沙夜
+    objectPosition: "14% 42%",
   },
   // 官方 CG：仅全年龄向（已排除 H 场景）
   {

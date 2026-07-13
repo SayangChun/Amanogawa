@@ -1389,6 +1389,11 @@ button {
   transition: transform 0.55s var(--ease);
 }
 
+/* 主视觉全图偏右为其他角色；无 inline 时兜底对准左侧沙夜 */
+.archive-card[data-id="art-mv"] img {
+  object-position: 14% 42%;
+}
+
 .archive-card:hover img {
   transform: scale(1.04);
 }
