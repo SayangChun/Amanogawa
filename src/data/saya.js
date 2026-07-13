@@ -38,7 +38,7 @@ export const saya = {
     { icon: "☾", title: "观星记录", desc: "默默记录光污染下日渐稀少的星光，守护夜空。" },
   ],
   // 官方角色页高清立绘（本地缓存，约 1280×1698）
-  heroImage: "./assets/gallery/saya-portrait.png",
+  heroImage: "./assets/gallery/official/saya-portrait.png",
   links: [
     { label: "Bangumi", href: "https://bgm.tv/character/34203" },
     { label: "VNDB", href: "https://vndb.org/c35176" },

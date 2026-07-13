@@ -1,150 +1,22 @@
 import { saya } from "./data/saya.js";
-import { galleryItems, galleryCategories } from "./data/gallery.js";
+import { galleryPreview } from "./data/gallery-archive.js";
 import { quotes } from "./data/quotes.js";
 import { notes } from "./data/notes.js";
+import {
+  esc,
+  imgSrc,
+  bindImageFallbacks,
+  initStarfield,
+  createLightbox,
+  bindHeader,
+  renderSiteHeader,
+  renderSiteFooter,
+  bindReveal,
+} from "./shared.js";
 
 const app = document.querySelector("#app");
-const lightbox = document.querySelector("#lightbox");
 
-/* ---------- helpers ---------- */
-
-const esc = (s) =>
-  String(s)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-
-const xmlEsc = (s) =>
-  String(s).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-
-const fallbackSvg = (label, sub = "Amanogawa Saya") =>
-  `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0a1228"/>
-      <stop offset="55%" stop-color="#0d1a3a"/>
-      <stop offset="100%" stop-color="#1a1030"/>
-    </linearGradient>
-    <radialGradient id="b" cx="38%" cy="42%" r="35%">
-      <stop offset="0%" stop-color="#5b9dff" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#5b9dff" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="a" cx="62%" cy="48%" r="32%">
-      <stop offset="0%" stop-color="#e8a85c" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#e8a85c" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="900" height="1200" fill="url(#g)"/>
-  <rect width="900" height="1200" fill="url(#b)"/>
-  <rect width="900" height="1200" fill="url(#a)"/>
-  <circle cx="180" cy="160" r="1.5" fill="#fff" opacity="0.7"/>
-  <circle cx="720" cy="220" r="1.2" fill="#fff" opacity="0.55"/>
-  <circle cx="540" cy="90" r="1.8" fill="#cfe0ff" opacity="0.8"/>
-  <circle cx="300" cy="980" r="1.4" fill="#ffd9a8" opacity="0.5"/>
-  <text x="50%" y="48%" text-anchor="middle" fill="#eef4ff" font-size="42" font-family="Georgia, serif">${xmlEsc(label)}</text>
-  <text x="50%" y="54%" text-anchor="middle" fill="#9aaccf" font-size="22" font-family="system-ui, sans-serif">${xmlEsc(sub)}</text>
-</svg>
-`)}`;
-
-const imgSrc = (src, label) => src || fallbackSvg(label);
-
-function bindImageFallbacks(root = document) {
-  root.querySelectorAll("img[data-fallback]").forEach((img) => {
-    const label = img.dataset.fallback || "Saya";
-    img.addEventListener(
-      "error",
-      () => {
-        if (img.dataset.failed) return;
-        img.dataset.failed = "1";
-        img.src = fallbackSvg(label);
-      },
-      { once: true },
-    );
-  });
-}
-
-/* ---------- starfield ---------- */
-
-function initStarfield() {
-  const canvas = document.getElementById("starfield");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  let w = 0;
-  let h = 0;
-  let stars = [];
-  let raf = 0;
-  let reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const resize = () => {
-    w = canvas.width = window.innerWidth * devicePixelRatio;
-    h = canvas.height = window.innerHeight * devicePixelRatio;
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
-    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    spawn();
-  };
-
-  const spawn = () => {
-    const count = Math.min(180, Math.floor((window.innerWidth * window.innerHeight) / 9000));
-    stars = Array.from({ length: count }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.35 + 0.2,
-      a: Math.random() * 0.6 + 0.15,
-      s: Math.random() * 0.015 + 0.004,
-      p: Math.random() * Math.PI * 2,
-      c: Math.random() > 0.82 ? (Math.random() > 0.5 ? "#9ec0ff" : "#ffd4a0") : "#ffffff",
-    }));
-  };
-
-  const draw = (t) => {
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    for (const star of stars) {
-      const twinkle = reduceMotion ? star.a : star.a * (0.55 + 0.45 * Math.sin(t * star.s + star.p));
-      ctx.beginPath();
-      ctx.fillStyle = star.c;
-      ctx.globalAlpha = twinkle;
-      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    if (!reduceMotion) raf = requestAnimationFrame(draw);
-  };
-
-  resize();
-  draw(0);
-  window.addEventListener("resize", () => {
-    cancelAnimationFrame(raf);
-    resize();
-    draw(0);
-  });
-}
-
-/* ---------- render blocks ---------- */
-
-const renderNav = () => `
-  <header class="site-header" id="top">
-    <a class="brand" href="#top">
-      <span class="brand-orb" aria-hidden="true"></span>
-      <span class="brand-text">
-        <span class="brand-kicker">Amanogawa Saya</span>
-        <span class="brand-name">${esc(saya.name)}</span>
-      </span>
-    </a>
-    <button class="nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
-      <span></span><span></span>
-    </button>
-    <nav class="site-nav" aria-label="主导航">
-      <a href="#about">关于</a>
-      <a href="#profile">档案</a>
-      <a href="#gallery">图集</a>
-      <a href="#quotes">星语</a>
-      <a href="#notes">备注</a>
-    </nav>
-  </header>
-`;
+const lightbox = createLightbox(() => galleryPreview);
 
 const renderHero = () => `
   <section class="hero" id="home">
@@ -162,7 +34,7 @@ const renderHero = () => `
       <p class="hero-tagline">${esc(saya.tagline)}</p>
       <p class="hero-lede">${esc(saya.subtitle)}</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="#gallery">浏览图集</a>
+        <a class="btn btn-primary" href="./gallery.html">进入完整图集</a>
         <a class="btn btn-ghost" href="#profile">查看档案</a>
       </div>
       <ul class="hero-meta">
@@ -280,24 +152,16 @@ const renderProfile = () => `
 
 const renderGallery = () => `
   <section class="section gallery" id="gallery">
-    <div class="section-head">
-      <p class="eyebrow">Gallery</p>
-      <h2>图集</h2>
-      <p class="section-desc">把最喜欢的她，一帧帧留在星空里。</p>
-    </div>
-    <div class="gallery-filters" role="tablist" aria-label="图集分类">
-      ${galleryCategories
-        .map(
-          (c, i) => `
-        <button type="button" class="filter-btn${i === 0 ? " is-active" : ""}" data-filter="${esc(c)}" role="tab" aria-selected="${i === 0}">
-          ${esc(c)}
-        </button>
-      `,
-        )
-        .join("")}
+    <div class="section-head gallery-head">
+      <div>
+        <p class="eyebrow">Gallery</p>
+        <h2>精选图集</h2>
+        <p class="section-desc">首页只放几张代表作，更多官方 CG 与 AI 创作在完整图集里。</p>
+      </div>
+      <a class="btn btn-primary" href="./gallery.html">打开完整图集</a>
     </div>
     <div class="gallery-grid" id="gallery-grid">
-      ${galleryItems
+      ${galleryPreview
         .map(
           (item, index) => `
         <figure class="shot" data-category="${esc(item.category)}" data-index="${index}">
@@ -318,6 +182,11 @@ const renderGallery = () => `
       `,
         )
         .join("")}
+    </div>
+    <div class="gallery-more">
+      <a class="btn btn-ghost" href="./gallery.html#official-cg">官方 CG</a>
+      <a class="btn btn-ghost" href="./gallery.html#ai">AI 创作</a>
+      <a class="btn btn-ghost" href="./gallery.html#official-art">官方立绘</a>
     </div>
   </section>
 `;
@@ -370,152 +239,8 @@ const renderNotes = () => `
   </section>
 `;
 
-const renderFooter = () => `
-  <footer class="site-footer">
-    <div class="footer-constellation" aria-hidden="true">
-      <span class="dot blue"></span>
-      <span class="line"></span>
-      <span class="dot amber"></span>
-      <span class="line"></span>
-      <span class="dot blue"></span>
-    </div>
-    <p class="footer-title">${esc(saya.name)}</p>
-    <p class="footer-sub">${esc(saya.series)} · ${esc(saya.nameRomaji)}</p>
-    <p class="footer-hint">以后或许会加入陪伴功能。今晚，先一起看看星星吧。</p>
-    <p class="footer-credit">Fan tribute · 图片来源见角色档案外链 · 仅供个人欣赏</p>
-  </footer>
-`;
-
-/* ---------- lightbox ---------- */
-
-function openLightbox(index) {
-  const item = galleryItems[index];
-  if (!item) return;
-  lightbox.hidden = false;
-  lightbox.setAttribute("aria-hidden", "false");
-  document.body.classList.add("lightbox-open");
-  lightbox.innerHTML = `
-    <div class="lightbox-backdrop" data-close></div>
-    <div class="lightbox-panel" role="dialog" aria-modal="true" aria-label="${esc(item.title)}">
-      <button type="button" class="lightbox-close" data-close aria-label="关闭">×</button>
-      <button type="button" class="lightbox-nav prev" data-nav="-1" aria-label="上一张">‹</button>
-      <button type="button" class="lightbox-nav next" data-nav="1" aria-label="下一张">›</button>
-      <img src="${imgSrc(item.src, item.title)}" alt="${esc(item.alt)}" data-fallback="${esc(item.title)}" />
-      <div class="lightbox-meta">
-        <span>${esc(item.category)}</span>
-        <strong>${esc(item.title)}</strong>
-        <p>${esc(item.caption)}</p>
-      </div>
-    </div>
-  `;
-  lightbox.dataset.index = String(index);
-  bindImageFallbacks(lightbox);
-  lightbox.querySelector(".lightbox-close")?.focus();
-}
-
-function closeLightbox() {
-  lightbox.hidden = true;
-  lightbox.setAttribute("aria-hidden", "true");
-  lightbox.innerHTML = "";
-  document.body.classList.remove("lightbox-open");
-}
-
-function stepLightbox(delta) {
-  const current = Number(lightbox.dataset.index || 0);
-  const next = (current + delta + galleryItems.length) % galleryItems.length;
-  openLightbox(next);
-}
-
-/* ---------- interactions ---------- */
-
-function bindInteractions() {
-  const header = document.querySelector(".site-header");
-  const toggle = document.querySelector(".nav-toggle");
-  const nav = document.querySelector(".site-nav");
-
-  const onScroll = () => {
-    header?.classList.toggle("is-scrolled", window.scrollY > 24);
-  };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-
-  toggle?.addEventListener("click", () => {
-    const open = !nav?.classList.contains("is-open");
-    nav?.classList.toggle("is-open", open);
-    toggle.setAttribute("aria-expanded", String(open));
-    toggle.setAttribute("aria-label", open ? "关闭菜单" : "打开菜单");
-  });
-
-  nav?.querySelectorAll("a").forEach((a) => {
-    a.addEventListener("click", () => {
-      nav.classList.remove("is-open");
-      toggle?.setAttribute("aria-expanded", "false");
-    });
-  });
-
-  // Gallery filter
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const filter = btn.dataset.filter;
-      document.querySelectorAll(".filter-btn").forEach((b) => {
-        b.classList.toggle("is-active", b === btn);
-        b.setAttribute("aria-selected", String(b === btn));
-      });
-      document.querySelectorAll(".shot").forEach((shot) => {
-        const cat = shot.dataset.category;
-        const show = filter === "全部" || cat === filter;
-        shot.hidden = !show;
-      });
-    });
-  });
-
-  // Gallery open
-  document.querySelector("#gallery-grid")?.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-index]");
-    if (!btn || btn.tagName !== "BUTTON") return;
-    openLightbox(Number(btn.dataset.index));
-  });
-
-  lightbox.addEventListener("click", (e) => {
-    if (e.target.closest("[data-close]")) closeLightbox();
-    const navBtn = e.target.closest("[data-nav]");
-    if (navBtn) stepLightbox(Number(navBtn.dataset.nav));
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (lightbox.hidden) return;
-    if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") stepLightbox(-1);
-    if (e.key === "ArrowRight") stepLightbox(1);
-  });
-
-  // Reveal on scroll
-  const revealables = document.querySelectorAll(".section, .trait-card, .quote-card, .note-card, .shot");
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            io.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
-    );
-    revealables.forEach((el) => {
-      el.classList.add("reveal");
-      io.observe(el);
-    });
-  } else {
-    revealables.forEach((el) => el.classList.add("is-visible"));
-  }
-}
-
-/* ---------- boot ---------- */
-
 app.innerHTML = `
-  ${renderNav()}
+  ${renderSiteHeader({ active: "home", base: "." })}
   <main class="page">
     ${renderHero()}
     ${renderAbout()}
@@ -524,9 +249,16 @@ app.innerHTML = `
     ${renderQuotes()}
     ${renderNotes()}
   </main>
-  ${renderFooter()}
+  ${renderSiteFooter(saya)}
 `;
 
 bindImageFallbacks(app);
 initStarfield();
-bindInteractions();
+bindHeader("home");
+bindReveal(app);
+
+document.querySelector("#gallery-grid")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-index]");
+  if (!btn || btn.tagName !== "BUTTON") return;
+  lightbox.open(Number(btn.dataset.index));
+});

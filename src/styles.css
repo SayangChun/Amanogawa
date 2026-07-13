@@ -183,8 +183,24 @@ button {
   transition: color 0.2s;
 }
 
-.site-nav a:hover {
+.site-nav a:hover,
+.site-nav a.is-current {
   color: var(--text);
+}
+
+.site-nav a.is-current {
+  position: relative;
+}
+
+.site-nav a.is-current::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--amber));
 }
 
 .nav-toggle {
@@ -1202,7 +1218,311 @@ button {
     animation: none;
   }
 
-  .shot img {
+  .shot img,
+  .archive-card img {
     transition: none;
+  }
+}
+
+/* =========================================================
+   Full gallery archive page
+   ========================================================= */
+
+.archive-page {
+  padding-top: 8px;
+}
+
+.archive-hero {
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  gap: 18px;
+  align-items: stretch;
+  padding: 18px 0 8px;
+}
+
+.archive-hero h1 {
+  margin: 0 0 12px;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.archive-lede {
+  margin: 0 0 22px;
+  max-width: 42ch;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.archive-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.stat-pill span {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.archive-hero-side {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.archive-hero-side .label {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  font-family: var(--font-display);
+}
+
+.archive-hero-side ul {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.archive-hero-side li {
+  margin-bottom: 6px;
+}
+
+.archive-hero-side code,
+.drop-hint code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.86em;
+  color: var(--blue);
+  background: rgba(110, 168, 255, 0.1);
+  padding: 0.1em 0.4em;
+  border-radius: 6px;
+}
+
+.archive-hero-side .btn {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.gallery-head,
+.archive-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.gallery-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.filter-count {
+  font-style: normal;
+  margin-left: 6px;
+  opacity: 0.7;
+  font-size: 0.82em;
+}
+
+.filter-btn.is-active .filter-count {
+  opacity: 0.85;
+  color: inherit;
+}
+
+.archive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.archive-card {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 20%, rgba(110, 168, 255, 0.1), transparent 55%),
+    linear-gradient(180deg, #121c38 0%, #0a1228 100%);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.archive-open {
+  position: relative;
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 220px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.archive-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.55s var(--ease);
+}
+
+.archive-card:hover img {
+  transform: scale(1.04);
+}
+
+.archive-zoom {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: rgba(5, 10, 24, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  font-family: var(--font-display);
+}
+
+.archive-card:hover .archive-zoom {
+  opacity: 1;
+  transform: none;
+}
+
+.archive-card figcaption {
+  position: relative;
+  z-index: 1;
+  padding: 14px 14px 16px;
+  background: linear-gradient(180deg, transparent, rgba(4, 8, 20, 0.72) 18%, rgba(4, 8, 20, 0.92));
+  margin-top: -40px;
+}
+
+.archive-card figcaption strong {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+}
+
+.archive-card figcaption p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.archive-card[data-source="ai"] {
+  box-shadow: inset 0 0 0 1px rgba(232, 168, 92, 0.12);
+}
+
+.archive-card[data-source="official-cg"] {
+  box-shadow: inset 0 0 0 1px rgba(110, 168, 255, 0.1);
+}
+
+.drop-hint {
+  padding: clamp(28px, 5vw, 42px);
+  text-align: center;
+  max-width: 640px;
+  margin: 8px auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.drop-hint-orb {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue) 0 50%, var(--amber) 50% 100%);
+  box-shadow: 0 0 30px var(--blue-glow), 0 0 40px var(--amber-glow);
+}
+
+.drop-hint h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+}
+
+.drop-hint p {
+  margin: 0 0 12px;
+  color: var(--text-soft);
+}
+
+.drop-hint ol {
+  text-align: left;
+  display: inline-block;
+  margin: 8px 0 14px;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.drop-hint-note {
+  font-size: 0.9rem;
+  color: var(--muted) !important;
+}
+
+.empty-tip {
+  margin: 24px 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 920px) {
+  .archive-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .archive-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .archive-card {
+    min-height: 240px;
+  }
+
+  .archive-open {
+    min-height: 160px;
+  }
+
+  .gallery-head .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .archive-grid {
+    grid-template-columns: 1fr;
   }
 }

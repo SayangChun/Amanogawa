@@ -4,11 +4,11 @@
 
 ## 功能
 
-- **首页主视觉**：星空背景、角色立绘、作品信息
-- **关于她**：人物简介与性格特质卡片
-- **角色档案**：生日、身高、CV 等设定与外链
-- **图集**：分类筛选 + 灯箱浏览
-- **星语 / 备注**：台词印象与个人书写
+- **首页**：角色简介、档案、精选图、星语、个人备注
+- **完整图集页** `gallery.html`
+  - 官方立绘（PULLTOP / Bangumi）
+  - 官方 CG（官网 Gallery 中沙夜出场的公开图）
+  - AI 创作（本地文件夹自动扫描）
 
 ## 运行
 
@@ -16,43 +16,42 @@
 npm start
 ```
 
-浏览器打开 `http://localhost:3000`。也可直接用任意静态服务器打开项目根目录。
+- 首页：http://localhost:3000/
+- 图集：http://localhost:3000/gallery.html
 
-## 结构
+## 添加你的 AI 图
+
+1. 把图片放进 `assets/gallery/ai/`
+2. 支持 `jpg / jpeg / png / webp / gif`
+3. 刷新图集页，切到 **AI 创作**
+
+本地 `npm start` 会通过 `/api/ai-images` 自动扫描文件夹。  
+纯静态部署时，可改为编辑 `src/data/ai-gallery.js` 手动登记。
+
+## 目录
 
 ```
-index.html          入口
-server.js           本地静态服务
+index.html              首页
+gallery.html            完整图集
+server.js               本地静态服务 + AI 图扫描 API
+assets/gallery/
+  official/             官方图片缓存
+  ai/                   你的 AI 创作（丢文件即可）
 src/
-  main.js           渲染与交互
-  styles.css        全站样式
+  main.js               首页逻辑
+  gallery-page.js       图集页逻辑
+  shared.js             星空 / 灯箱 / 导航共用
+  styles.css
   data/
-    saya.js         角色档案
-    gallery.js      图集
-    quotes.js       星语
-    notes.js        个人备注
+    saya.js             角色档案
+    gallery-archive.js  官方图清单 + 首页精选
+    ai-gallery.js       AI 图手动清单（可选）
+    quotes.js / notes.js
 ```
 
-## 换图
+## 来源说明
 
-在 `src/data/gallery.js` / `saya.js` 中修改 `src` / `heroImage`。
-
-推荐把图片放到本地，例如：
-
-```
-assets/gallery/uniform.jpg
-```
-
-然后写：
-
-```js
-src: "./assets/gallery/uniform.jpg"
-```
-
-当前默认使用 Bangumi 公开角色图作为占位，外网不可用时会自动切到星空 fallback 图。
-
-## 后续可扩展
-
-- 时间线 / 更多截图分类
-- 本地图库与收藏
-- 陪伴向小功能（问候、台词抽选等）
+- 官方立绘 / CG：PULLTOP《見上げてごらん、夜空の星を》官网公开素材
+- 部分设定图：Bangumi 角色页
+- 图集仅收录全年龄向内容（已排除 H / 裸露等 18+ 场景）
+- 仅供个人欣赏的同人向展示，请勿商业使用

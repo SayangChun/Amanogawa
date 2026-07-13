@@ -17,13 +17,50 @@ const mimeTypes = new Map([
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
   [".webp", "image/webp"],
+  [".gif", "image/gif"],
   [".ico", "image/x-icon"],
+  [".md", "text/markdown; charset=utf-8"],
 ]);
+
+const AI_DIR = path.join(__dirname, "assets", "gallery", "ai");
+const AI_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
+
+async function listAiImages() {
+  try {
+    const entries = await fs.readdir(AI_DIR, { withFileTypes: true });
+    const images = entries
+      .filter((e) => e.isFile() && AI_EXTS.has(path.extname(e.name).toLowerCase()))
+      .map((e) => e.name)
+      .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
+      .map((name) => ({
+        id: `ai-${name}`,
+        title: name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "),
+        caption: "个人 AI 创作 · 天之川沙夜",
+        src: `./assets/gallery/ai/${name}`,
+      }));
+    return images;
+  } catch {
+    return [];
+  }
+}
 
 const server = http.createServer(async (req, res) => {
   try {
-    const urlPath = req.url === "/" ? "/index.html" : req.url.split("?")[0];
-    const safePath = path.normalize(decodeURIComponent(urlPath)).replace(/^(\.\.(\/|\\|$))+/, "");
+    const rawUrl = req.url || "/";
+    const urlPath = decodeURIComponent(rawUrl.split("?")[0]);
+
+    if (urlPath === "/api/ai-images") {
+      const images = await listAiImages();
+      res.writeHead(200, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store",
+      });
+      res.end(JSON.stringify({ images }));
+      return;
+    }
+
+    const requestPath = urlPath === "/" ? "/index.html" : urlPath;
+    const safePath = path.normalize(requestPath).replace(/^(\.\.(\/|\\|$))+/, "");
     const filePath = path.join(__dirname, safePath);
     const data = await fs.readFile(filePath);
     const ext = path.extname(filePath).toLowerCase();
