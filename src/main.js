@@ -1,6 +1,6 @@
 import { saya } from "./data/saya.js";
 import { galleryPreview } from "./data/gallery-archive.js";
-import { quotes } from "./data/quotes.js";
+import { quotesPreview } from "./data/quotes.js";
 import { notes } from "./data/notes.js";
 import {
   esc,
@@ -193,23 +193,31 @@ const renderGallery = () => `
 
 const renderQuotes = () => `
   <section class="section quotes" id="quotes">
-    <div class="section-head">
-      <p class="eyebrow">Starlight</p>
-      <h2>星语</h2>
-      <p class="section-desc">几句关于她的话，像连成星座的光点。</p>
+    <div class="section-head gallery-head">
+      <div>
+        <p class="eyebrow">Starlight</p>
+        <h2>星语</h2>
+        <p class="section-desc">她说过的话，以及与她相连的星空名句。首页只放几颗，完整摘录在星语页。</p>
+      </div>
+      <a class="btn btn-primary" href="./quotes.html">打开完整星语</a>
     </div>
     <div class="quotes-grid">
-      ${quotes
+      ${quotesPreview
         .map(
           (q, i) => `
         <article class="glass quote-card" style="--i:${i}">
           <p class="quote-text">「${esc(q.text)}」</p>
-          <p class="quote-note">${esc(q.note)}</p>
-          <span class="quote-source">${esc(q.source)}</span>
+          <p class="quote-note">${esc(q.context || q.note || "")}</p>
+          <span class="quote-source">${esc(q.speaker)} · ${esc(q.badge || q.source || "")}</span>
         </article>
       `,
         )
         .join("")}
+    </div>
+    <div class="gallery-more">
+      <a class="btn btn-ghost" href="./quotes.html#saya">沙夜台词</a>
+      <a class="btn btn-ghost" href="./quotes.html#about">关于她</a>
+      <a class="btn btn-ghost" href="./quotes.html#star">星空</a>
     </div>
   </section>
 `;

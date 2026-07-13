@@ -9,6 +9,9 @@
   - 官方立绘（PULLTOP / Bangumi）
   - 官方 CG（官网 Gallery 中沙夜出场的公开图）
   - AI 创作（本地文件夹自动扫描）
+- **完整星语页** `quotes.html`
+  - 沙夜台词 / 关于她 / 星空名句
+  - 标注来源，可按分类筛选
 
 ## 运行
 
@@ -18,6 +21,7 @@ npm start
 
 - 首页：http://localhost:3000/
 - 图集：http://localhost:3000/gallery.html
+- 星语：http://localhost:3000/quotes.html
 
 ## 添加你的 AI 图
 

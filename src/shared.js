@@ -205,6 +205,7 @@ export function bindHeader(active = "home") {
 export function renderSiteHeader({ active = "home", base = "." } = {}) {
   const home = `${base}/index.html`;
   const gallery = `${base}/gallery.html`;
+  const quotes = `${base}/quotes.html`;
   return `
   <header class="site-header" id="top">
     <a class="brand" href="${home}">
@@ -221,7 +222,7 @@ export function renderSiteHeader({ active = "home", base = "." } = {}) {
       <a href="${home}#about" data-nav="about">关于</a>
       <a href="${home}#profile" data-nav="profile">档案</a>
       <a href="${gallery}" data-nav="gallery" class="${active === "gallery" ? "is-current" : ""}">图集</a>
-      <a href="${home}#quotes" data-nav="quotes">星语</a>
+      <a href="${quotes}" data-nav="quotes" class="${active === "quotes" ? "is-current" : ""}">星语</a>
       <a href="${home}#notes" data-nav="notes">备注</a>
     </nav>
   </header>`;
@@ -245,7 +246,9 @@ export function renderSiteFooter(saya) {
 }
 
 export function bindReveal(root = document) {
-  const revealables = root.querySelectorAll(".section, .trait-card, .quote-card, .note-card, .shot, .archive-card, .drop-hint");
+  const revealables = root.querySelectorAll(
+    ".section, .trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint",
+  );
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver(
       (entries) => {

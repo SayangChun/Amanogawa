@@ -24,6 +24,11 @@ const mimeTypes = new Map([
   [".webmanifest", "application/manifest+json; charset=utf-8"],
 ]);
 
+const REWRITES = [
+  { source: "/gallery", destination: "/gallery.html" },
+  { source: "/quotes", destination: "/quotes.html" },
+];
+
 const AI_DIR = path.join(__dirname, "assets", "gallery", "ai");
 const AI_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
@@ -61,7 +66,13 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const requestPath = urlPath === "/" ? "/index.html" : urlPath;
+    const rewrite = REWRITES.find((r) => r.source === urlPath);
+    const requestPath =
+      urlPath === "/"
+        ? "/index.html"
+        : rewrite
+        ? rewrite.destination
+        : urlPath;
     const safePath = path.normalize(requestPath).replace(/^(\.\.(\/|\\|$))+/, "");
     const filePath = path.join(__dirname, safePath);
     const data = await fs.readFile(filePath);
