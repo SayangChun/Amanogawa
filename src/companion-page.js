@@ -6,6 +6,7 @@ import {
   timerPresets,
   timerDoneLines,
   dialogues,
+  interactions,
   STORAGE_KEY,
 } from "./data/companion.js";
 import {
@@ -157,6 +158,11 @@ const greeting = pickRandom(greetings[period] || greetings.night);
 let currentLine = pickRandom(linePool);
 let lastLineId = currentLine?.id;
 
+/** 随口互动：当前选中的互动与回复 */
+let currentInteractionId = interactions[0]?.id || "";
+let currentInteractionReply = null;
+let lastInteractionReplyText = "";
+
 let activeDialogueId = visit.lastDialogueId && dialogues.some((d) => d.id === visit.lastDialogueId)
   ? visit.lastDialogueId
   : dialogues[0]?.id;
@@ -177,10 +183,12 @@ let timerLastTs = 0;
 
 function visitSubtitle() {
   if (visit.totalVisits <= 1) {
-    return "第一次来到这里。今晚，我们从一起看星星开始。";
+    return "第一次来到这里。……被当成局外人可不行，今晚从一起看星星开始。";
   }
   const parts = [`这是第 ${visit.totalVisits} 次来看星`];
-  if (visit.streak >= 2) {
+  if (visit.streak >= 7) {
+    parts.push(`已经连续 ${visit.streak} 天了，沙夜会认真记住的`);
+  } else if (visit.streak >= 2) {
     parts.push(`已连续 ${visit.streak} 天`);
   }
   return `${parts.join(" · ")}。`;
@@ -222,8 +230,9 @@ function renderPresence() {
         <h1 class="companion-title">今晚，一起看星星</h1>
         <p class="companion-greeting">「${esc(greeting?.text || "……你来了。")}」</p>
         <p class="companion-visit">${esc(visitSubtitle())}</p>
-        <p class="companion-hint">不用赶路。问候、星笺、计时与小对话——慢慢挑一样就好。</p>
+        <p class="companion-hint">不用赶路。问候、随口互动、星笺、计时与小对话——慢慢挑一样就好。</p>
         <div class="companion-jump">
+          <a class="btn btn-ghost" href="#interact">随口互动</a>
           <a class="btn btn-ghost" href="#starline">今日星笺</a>
           <a class="btn btn-ghost" href="#stargaze">一起看星星</a>
           <a class="btn btn-ghost" href="#dialogue">小对话</a>
@@ -245,6 +254,59 @@ function renderPresence() {
           <span class="companion-portrait-name">${esc(saya.name)}</span>
         </div>
       </div>
+    </div>
+  </section>`;
+}
+
+function renderInteract() {
+  const reply = currentInteractionReply;
+  const active = interactions.find((i) => i.id === currentInteractionId) || interactions[0];
+  return `
+  <section class="section" id="interact">
+    <div class="section-head">
+      <p class="eyebrow">Interact</p>
+      <h2>随口互动</h2>
+      <p class="section-desc">点一句你想说的，沙夜会按她的性子接住——气质整理向，非剧本原句。</p>
+    </div>
+    <div class="glass companion-interact">
+      <div class="interact-actions" role="group" aria-label="对沙夜说">
+        ${interactions
+          .map(
+            (item) => `
+          <button
+            type="button"
+            class="interact-chip${item.id === currentInteractionId && reply ? " is-active" : ""}"
+            data-interact="${esc(item.id)}"
+            title="${esc(item.hint || item.label)}"
+          >
+            <span class="interact-chip-label">${esc(item.label)}</span>
+            ${item.hint ? `<span class="interact-chip-hint">${esc(item.hint)}</span>` : ""}
+          </button>`,
+          )
+          .join("")}
+      </div>
+      <article
+        class="companion-bubble interact-reply${reply ? " is-pop" : ""}"
+        id="interact-bubble"
+        data-mood="${esc(reply?.mood || "soft")}"
+      >
+        <p class="interact-you">${
+          reply
+            ? `你 · ${esc(active?.label || "……")}`
+            : "选上面任意一句，像在夜空下轻声开口。"
+        }</p>
+        <p class="companion-bubble-text" id="interact-text">
+          ${reply ? `「${esc(reply.text)}」` : "「……我在听。」"}
+        </p>
+        <span class="companion-bubble-badge">${reply ? "沙夜" : "等待"}</span>
+      </article>
+      ${
+        reply
+          ? `<div class="interact-again">
+              <button type="button" class="btn btn-ghost" data-interact-again>她再说一遍（换句）</button>
+            </div>`
+          : ""
+      }
     </div>
   </section>`;
 }
@@ -348,7 +410,7 @@ function renderDialogue() {
     <div class="section-head">
       <p class="eyebrow">Dialogue</p>
       <h2>小对话</h2>
-      <p class="section-desc">短短几句分支对话。气质整理向，非游戏剧本原句。</p>
+      <p class="section-desc">多主题分支对话（观星、便当、吃醋、雨夜……）。气质整理向，非游戏剧本原句。</p>
     </div>
     <div class="glass companion-dialogue">
       <div class="dialogue-tabs" role="tablist" aria-label="对话主题">
@@ -397,6 +459,7 @@ function renderPage() {
     ${renderSiteHeader({ active: "companion", base: "." })}
     <main class="page companion-page">
       ${renderPresence()}
+      ${renderInteract()}
       ${renderStarline()}
       ${renderTimer()}
       ${renderDialogue()}
@@ -581,12 +644,60 @@ function refreshStarline() {
   bubble.classList.add("is-pop");
 }
 
+function pickInteractionReply(interactionId, avoidText = "") {
+  const item = interactions.find((i) => i.id === interactionId);
+  if (!item?.replies?.length) return null;
+  const pool = item.replies.map((r, i) => ({
+    id: `${item.id}-${i}`,
+    text: r.text,
+    mood: r.mood || "soft",
+  }));
+  return pickRandom(pool, avoidText);
+}
+
+function runInteraction(interactionId, again = false) {
+  currentInteractionId = interactionId;
+  const avoid = again ? lastInteractionReplyText : "";
+  const reply = pickInteractionReply(interactionId, avoid);
+  if (!reply) return;
+  currentInteractionReply = reply;
+  lastInteractionReplyText = reply.text;
+  refreshInteractSection();
+}
+
+function refreshInteractSection() {
+  const section = document.querySelector("#interact");
+  if (!section) return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = renderInteract();
+  const next = wrap.firstElementChild;
+  section.replaceWith(next);
+  next.classList.add("reveal", "is-visible");
+  const bubble = next.querySelector("#interact-bubble");
+  if (bubble && currentInteractionReply) {
+    bubble.classList.remove("is-pop");
+    void bubble.offsetWidth;
+    bubble.classList.add("is-pop");
+  }
+}
+
 // ---------- events（委托到 #app，避免局部重绘丢监听） ----------
 
 function bindEvents() {
   app.addEventListener("click", (e) => {
     if (e.target.closest("#line-refresh")) {
       refreshStarline();
+      return;
+    }
+
+    const interactBtn = e.target.closest("[data-interact]");
+    if (interactBtn) {
+      runInteraction(interactBtn.dataset.interact, false);
+      return;
+    }
+
+    if (e.target.closest("[data-interact-again]")) {
+      if (currentInteractionId) runInteraction(currentInteractionId, true);
       return;
     }
 

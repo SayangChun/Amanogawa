@@ -253,7 +253,7 @@ export function bindReveal(root = document) {
   // 子元素即便已 is-visible 也看不见，表现就是「闪一下后整区消失」。
   const revealables = [
     ...root.querySelectorAll(
-      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue",
+      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue, .companion-interact",
     ),
   ].filter((el) => !el.classList.contains("is-visible"));
 

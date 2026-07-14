@@ -1936,6 +1936,82 @@ button {
   opacity: 1;
 }
 
+/* ---------- 随口互动 ---------- */
+
+.companion-interact {
+  padding: clamp(20px, 3vw, 28px);
+}
+
+.interact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.interact-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-soft);
+  text-align: left;
+  line-height: 1.35;
+  transition:
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease),
+    color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.interact-chip:hover {
+  border-color: rgba(110, 168, 255, 0.42);
+  background: rgba(110, 168, 255, 0.1);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.interact-chip.is-active {
+  border-color: rgba(232, 168, 92, 0.45);
+  background: rgba(232, 168, 92, 0.12);
+  color: var(--text);
+}
+
+.interact-chip-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.interact-chip-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.interact-chip.is-active .interact-chip-hint {
+  color: var(--amber-soft);
+  opacity: 0.9;
+}
+
+.interact-reply {
+  margin: 0;
+}
+
+.interact-you {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.interact-again {
+  margin-top: 14px;
+}
+
 .companion-dialogue {
   padding: clamp(20px, 3vw, 28px);
 }
