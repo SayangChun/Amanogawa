@@ -89,11 +89,11 @@ def crop_if_blue_border(im: Image.Image) -> Image.Image:
 def main() -> None:
     results: list[str] = []
 
-    # New CG05 childhood trio (Saya center)
+    # New CG05 childhood trio (Saya center); no separate thum05
+    # (official thum05 is the pink-haired friend, not Saya)
     im = to_rgb(Image.open(RAW / "cg05comp.png"))
     im = upscale(im, 2, 2560)
     save_jpg(im, OUT / "cg05-full.jpg")
-    save_png(Image.open(RAW / "thum05.png").convert("RGBA"), OUT / "thum05.png")
     results.append("cg05 childhood")
 
     # Upscale remaining known Saya CGs

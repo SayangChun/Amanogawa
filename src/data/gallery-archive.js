@@ -193,7 +193,9 @@ export const officialArchive = [
     source: "official-cg",
     badge: "官方 CG",
     src: `${O}/cg05-full.jpg`,
-    thumb: `${O}/thum05.png`,
+    // 原 thum05 为粉发角色特写；改用全图并裁切对准中间银发异瞳的沙夜
+    thumb: `${O}/cg05-full.jpg`,
+    objectPosition: "50% 42%",
   },
   {
     id: "cg-06",
