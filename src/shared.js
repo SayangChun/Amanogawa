@@ -248,26 +248,79 @@ export function renderSiteFooter(saya) {
 }
 
 export function bindReveal(root = document) {
-  const revealables = root.querySelectorAll(
-    ".section, .trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue",
-  );
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            io.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
-    );
-    revealables.forEach((el) => {
-      el.classList.add("reveal");
-      io.observe(el);
-    });
-  } else {
-    revealables.forEach((el) => el.classList.add("is-visible"));
+  // 注意：不要把整块 .section 做成 reveal。
+  // 星笺等长列表会把 section 撑得极高；若再给 section 加 opacity:0，
+  // 子元素即便已 is-visible 也看不见，表现就是「闪一下后整区消失」。
+  const revealables = [
+    ...root.querySelectorAll(
+      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue",
+    ),
+  ].filter((el) => !el.classList.contains("is-visible"));
+
+  if (!revealables.length) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    revealables.forEach((el) => el.classList.add("reveal", "is-visible"));
+    return;
   }
+
+  const markVisible = (el, io) => {
+    el.classList.add("is-visible");
+    io?.unobserve(el);
+  };
+
+  const inViewport = (el) => {
+    const rect = el.getBoundingClientRect();
+    // 布局尚未完成时 rect 可能全 0，交给 IO / rAF 兜底
+    if (rect.width === 0 && rect.height === 0) return false;
+    const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+    const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    return rect.bottom > -64 && rect.right > 0 && rect.top < vh + 64 && rect.left < vw;
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) markVisible(entry.target, io);
+      });
+    },
+    // threshold:0 → 任意像素进入即触发（高元素也稳定）
+    { threshold: 0, rootMargin: "64px 0px 64px 0px" },
+  );
+
+  // 挂到 root，避免观察者被过早回收
+  if (root && root.nodeType === 1) {
+    const bag = root.__revealObservers || (root.__revealObservers = []);
+    bag.push(io);
+  }
+
+  revealables.forEach((el) => {
+    el.classList.add("reveal");
+    if (inViewport(el)) {
+      // 首屏同步可见，避免先变透明再等 IO
+      markVisible(el, io);
+    } else {
+      io.observe(el);
+    }
+  });
+
+  // 布局稳定后再扫一遍，兜住首帧 rect 不准 / IO 延迟
+  const catchUp = () => {
+    revealables.forEach((el) => {
+      if (el.classList.contains("is-visible")) return;
+      if (inViewport(el)) markVisible(el, io);
+    });
+  };
+  requestAnimationFrame(() => requestAnimationFrame(catchUp));
+
+  // 极端环境（部分 headless / IO 未回调）下避免整页永远透明
+  window.setTimeout(() => {
+    const shown = revealables.some((el) => el.classList.contains("is-visible"));
+    if (!shown) {
+      revealables.forEach((el) => markVisible(el, io));
+    } else {
+      catchUp();
+    }
+  }, 320);
 }

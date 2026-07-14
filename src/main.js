@@ -198,7 +198,7 @@ const renderQuotes = () => `
       <div>
         <p class="eyebrow">Starlight</p>
         <h2>星笺</h2>
-        <p class="section-desc">她说过的话，以及与她相连的星空名句。首页只放几颗，完整摘录在星笺页。</p>
+        <p class="section-desc">她说过的话，以及与她相连的星空名句。首页只放几颗；完整摘录与标注 AI 仿作的新写星笺，都在星笺页。</p>
       </div>
       <a class="btn btn-primary" href="./quotes.html">打开完整星笺</a>
     </div>
@@ -219,6 +219,7 @@ const renderQuotes = () => `
       <a class="btn btn-ghost" href="./quotes.html#saya">沙夜台词</a>
       <a class="btn btn-ghost" href="./quotes.html#about">关于她</a>
       <a class="btn btn-ghost" href="./quotes.html#star">星空</a>
+      <a class="btn btn-ghost" href="./quotes.html#ai">AI仿作</a>
     </div>
   </section>
 `;

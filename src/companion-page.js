@@ -136,11 +136,11 @@ function buildLinePool() {
     mood: l.mood,
   }));
   const fromQuotes = quotesArchive
-    .filter((q) => q.category === "saya")
+    .filter((q) => q.category === "saya" || q.category === "ai")
     .map((q) => ({
       id: `q-${q.id}`,
       text: q.text,
-      badge: q.badge || "星笺",
+      badge: q.category === "ai" ? "AI仿作" : q.badge || "星笺",
       mood: "star",
     }));
   return [...fromCompanion, ...fromQuotes];

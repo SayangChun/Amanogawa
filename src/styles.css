@@ -1604,6 +1604,12 @@ button {
   color: var(--text-soft);
 }
 
+.quote-full-card[data-category="ai"] .quote-badge {
+  border-color: rgba(196, 148, 255, 0.35);
+  background: rgba(196, 148, 255, 0.1);
+  color: #d4b8ff;
+}
+
 .quote-speaker {
   color: var(--muted);
   font-size: 0.88rem;
