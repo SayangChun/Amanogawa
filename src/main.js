@@ -197,10 +197,10 @@ const renderQuotes = () => `
     <div class="section-head gallery-head">
       <div>
         <p class="eyebrow">Starlight</p>
-        <h2>星语</h2>
-        <p class="section-desc">她说过的话，以及与她相连的星空名句。首页只放几颗，完整摘录在星语页。</p>
+        <h2>星笺</h2>
+        <p class="section-desc">她说过的话，以及与她相连的星空名句。首页只放几颗，完整摘录在星笺页。</p>
       </div>
-      <a class="btn btn-primary" href="./quotes.html">打开完整星语</a>
+      <a class="btn btn-primary" href="./quotes.html">打开完整星笺</a>
     </div>
     <div class="quotes-grid">
       ${quotesPreview

@@ -68,7 +68,7 @@ function renderQuoteCard(q, index) {
 function renderList() {
   const items = filteredQuotes();
   if (!items.length) {
-    return `<p class="empty-tip">这个分类暂时没有星语。</p>`;
+    return `<p class="empty-tip">这个分类暂时没有星笺。</p>`;
   }
   return `
     <div class="quotes-full-grid" id="quotes-grid">
@@ -89,7 +89,7 @@ function renderPage() {
             Starlight Words
             <span class="dot amber"></span>
           </p>
-          <h1>沙夜的星语</h1>
+          <h1>沙夜的星笺</h1>
           <p class="archive-lede">
             她说过的话、别人对她说的话，以及与她命运相连的星空名句。
             每一句都尽量标注来源；公开可考的原台词并不多，其余以剧情与设定整理呈现。
@@ -108,7 +108,7 @@ function renderPage() {
             <li><strong>关于她</strong> — 晓斗的赞美、外号、星座隐喻</li>
             <li><strong>星空</strong> — 作品名句，与她的观星人生相映</li>
           </ul>
-          <a class="btn btn-ghost" href="./index.html#quotes">返回首页星语</a>
+          <a class="btn btn-ghost" href="./index.html#quotes">返回首页星笺</a>
         </div>
       </section>
 
@@ -118,7 +118,7 @@ function renderPage() {
             <p class="eyebrow">Collection</p>
             <h2>摘录</h2>
           </div>
-          <div class="gallery-filters archive-filters" role="tablist" aria-label="星语分类">
+          <div class="gallery-filters archive-filters" role="tablist" aria-label="星笺分类">
             ${renderFilters(c)}
           </div>
         </div>

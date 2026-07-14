@@ -223,7 +223,7 @@ export function renderSiteHeader({ active = "home", base = "." } = {}) {
       <a href="${home}#about" data-nav="about">关于</a>
       <a href="${home}#profile" data-nav="profile">档案</a>
       <a href="${gallery}" data-nav="gallery" class="${active === "gallery" ? "is-current" : ""}">图集</a>
-      <a href="${quotes}" data-nav="quotes" class="${active === "quotes" ? "is-current" : ""}">星语</a>
+      <a href="${quotes}" data-nav="quotes" class="${active === "quotes" ? "is-current" : ""}">星笺</a>
       <a href="${companion}" data-nav="companion" class="${active === "companion" ? "is-current" : ""}">陪伴</a>
       <a href="${home}#notes" data-nav="notes">备注</a>
     </nav>

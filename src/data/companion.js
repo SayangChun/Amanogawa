@@ -37,7 +37,7 @@ export const greetings = {
   ],
 };
 
-/** 陪伴向短句（可与沙夜星语混入随机池） */
+/** 陪伴向短句（可与沙夜星笺混入随机池） */
 export const companionLines = [
   { id: "cl-stay", text: "被当成局外人，可是不行的哦。", mood: "soft" },
   { id: "cl-stars-link", text: "只要还能一起抬头看夜空，就还不算分开太远。", mood: "star" },

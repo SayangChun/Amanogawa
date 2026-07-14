@@ -1,5 +1,5 @@
 /**
- * 星语 · 台词与印象摘录
+ * 星笺 · 台词与印象摘录
  * category:
  *   saya  — 沙夜本人台词 / 她口中的话
  *   about — 别人对她说的、或高度关联她的名句
@@ -16,7 +16,7 @@ export const quoteFilters = [
   { id: "star", label: "星空" },
 ];
 
-/** 完整星语库 */
+/** 完整星笺库 */
 export const quotesArchive = [
   {
     id: "nakama-hazure",

@@ -140,7 +140,7 @@ function buildLinePool() {
     .map((q) => ({
       id: `q-${q.id}`,
       text: q.text,
-      badge: q.badge || "星语",
+      badge: q.badge || "星笺",
       mood: "star",
     }));
   return [...fromCompanion, ...fromQuotes];
@@ -222,9 +222,9 @@ function renderPresence() {
         <h1 class="companion-title">今晚，一起看星星</h1>
         <p class="companion-greeting">「${esc(greeting?.text || "……你来了。")}」</p>
         <p class="companion-visit">${esc(visitSubtitle())}</p>
-        <p class="companion-hint">不用赶路。问候、星语、计时与小对话——慢慢挑一样就好。</p>
+        <p class="companion-hint">不用赶路。问候、星笺、计时与小对话——慢慢挑一样就好。</p>
         <div class="companion-jump">
-          <a class="btn btn-ghost" href="#starline">今日星语</a>
+          <a class="btn btn-ghost" href="#starline">今日星笺</a>
           <a class="btn btn-ghost" href="#stargaze">一起看星星</a>
           <a class="btn btn-ghost" href="#dialogue">小对话</a>
         </div>
@@ -256,7 +256,7 @@ function renderStarline() {
     <div class="section-head gallery-head">
       <div>
         <p class="eyebrow">Starline</p>
-        <h2>今日星语</h2>
+        <h2>今日星笺</h2>
         <p class="section-desc">一句一句换，像从夜空里捞起细碎的光。</p>
       </div>
       <button type="button" class="btn btn-primary" id="line-refresh">换一句</button>
