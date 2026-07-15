@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=720px,initial-scale=1">
+<title>見上げてごらん、夜空の星を FINE DAYS</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<link href="css/import.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<div id="sound">
+	<audio id="voice" src="sound/FINEDAYS_Voice.mp3" preload="auto"></audio>
+</div>
+<div id="fadeing"></div>
+<div id="opening">
+	<img src="img/1pxwh.gif" width="100%" height="100%" alt="" id="bgfade" />
+</div>
+<div id="bgmovie"></div>
+<!-- ▼pjaxで入れ替わる範囲▼ -->
+<div id="content">
+	<div id="maincontent">
+
+		<div id="charabox">
+		<div id="BGchara"><img src="img/chara/BG_chara.png"></div>
+		<h1>Character</h1>
+			<ul id="charamenu">
+			<li id="chara0"><span><img src="img/new.png"></span></li>
+			<li id="chara1"><span><img src="img/new.png"></span></li>
+			<li id="chara2"><span><img src="img/new.png"></span></li>
+			<li id="chara3"><span><img src="img/new.png"></span></li>
+			<li id="chara4"><span><img src="img/new.png"></span></li>
+			<li id="chara5"><span><img src="img/new.png"></span></li>
+			
+			<li id="chara7"><span><img src="img/new.png"></span></li>
+			<li id="chara6"><span><img src="img/new.png"></span></li>
+			<li id="chara8"><span><img src="img/new.png"></span></li>
+			<li id="chara9"><span><img src="img/new.png"></span></li>
+			<li id="chara10"><span><img src="img/new.png"></span></li>
+			<li id="chara11"><span><img src="img/new.png"></span></li>
+			<li id="chara12"><span><img src="img/new.png"></span></li>
+			<li id="chara13"><span><img src="img/new.png"></span></li>
+			<li id="chara14"><span><img src="img/new.png"></span></li>
+			<li id="chara15"><span><img src="img/new.png"></span></li>
+			<li id="chara16"><span><img src="img/new.png"></span></li>
+			<li id="chara17"><span><img src="img/new.png"></span></li>
+			</ul>
+			<!-- キャッチコピー上 -->
+			<div id="characatchA">
+				<img src="img/chara/chara_catch_hikariA.png">
+			</div>
+			<!-- キャラプロフィール -->
+			<div id="charaname">
+				<img src="img/chara/chara_name_hikari.png">
+			</div>
+			<!-- キャラ説明文 -->
+			<div id="charatxt">
+				<img src="img/chara/chara_txt_hikari.png">
+			</div>
+			<!-- サンプルボイス -->
+			<div id="samplevoice">
+				<audio id="voice" src="./voice/self_introduction_hikari.mp3" preload="auto"></audio>
+			</div>
+			
+			<!-- 横線 -->
+			<div id="charaborder">
+				<!-- 服装変化 -->
+				<ul id="dresschange">
+				<li class="dressch" id="dress0"><span><img src="img/new.png"></span></li>
+				<li class="dressch" id="dress1"><span><img src="img/new.png"></span></li>
+				<li class="dressch" id="dress2"><span><img src="img/new.png"></span></li>
+				<li class="dressch" id="dress3"><span><img src="img/new.png"></span></li>
+				<li class="dressch" id="dress4"><span><img src="img/new.png"></span></li>
+				<li class="dressch" id="childmode"></li>
+				</ul>
+				<!-- キャッチコピー下 -->
+				<div id="characatchB">
+					<img src="img/chara/chara_catch_hikariB.png">
+				</div>
+			</div>
+			<!-- キャラクター -->			
+			<div id="charaerea">
+				<div id="charadragg">
+				<span class="charabody"><img src="img/chara/chara_hikari_00.png" /></span>
+				<ul class="bxslider">
+				<li class="charaface01 charaface"><img src="img/chara/chara_toumei.png" /></li>
+				<li class="charaface02 charaface"><img src="img/chara/chara_toumei.png" /></li>
+				<li class="charaface03 charaface"><img src="img/chara/chara_toumei.png" /></li>
+				<li class="charaface04 charaface"><img src="img/chara/chara_toumei.png" /></li>
+				</ul>
+				</div>
+			</div>
+			<!-- 人物相関図スイッチ -->
+			<div id="diagramswitch"></div>
+		
+		</div>
+			<!-- 人物相関図 -->
+			<div class="diagrambox">
+			<div id="areaog"></div>
+			<div id="areamutsu"></div>
+			<div id="areacfriend"></div>
+			<div id="relationship"></div>
+			<div id="diagramclose">×</div>
+				<div class="spbuL" id="Dbu0" name="onoff"><img src="img/diagram/diagram_L_hikari_off.png" /></div>
+				<div class="spbuL" id="Dbu1" name="onoff"><img src="img/diagram/diagram_L_saya_off.png" /></div>
+				<div class="spbuL" id="Dbu2" name="onoff"><img src="img/diagram/diagram_L_orihime_off.png" /></div>
+				<div class="spbuL" id="Dbu3" name="onoff"><img src="img/diagram/diagram_L_korona_off.png" /></div>
+				<div class="spbuL" id="Dbu4" name="onoff"><img src="img/diagram/diagram_L_miharu_off.png" /></div>
+				<div class="spbuL" id="Dbu5" name="onoff"><img src="img/diagram/diagram_L_honoka_off.png" /></div>
+				<div class="spbuL" id="Dbu6" name="onoff"><img src="img/diagram/diagram_L_akito_off.png" /></div>
+				
+				<div class="spbuS" id="Dbu7" name="onoff"><img src="img/diagram/diagram_S_yamada_off.png" /></div>
+				<div class="spbuS" id="Dbu8" name="onoff"><img src="img/diagram/diagram_S_tamaki_off.png" /></div>
+				<div class="spbuS" id="Dbu9" name="onoff"><img src="img/diagram/diagram_S_takeichi_off.png" /></div>
+				<div class="spbuS" id="Dbu10" name="onoff"><img src="img/diagram/diagram_S_jinno_off.png" /></div>
+				<div class="spbuS" id="Dbu11" name="onoff"><img src="img/diagram/diagram_S_kanou_off.png" /></div>
+				<div class="spbuS" id="Dbu12" name="onoff"><img src="img/diagram/diagram_S_tajiri_off.png" /></div>
+				<div class="spbuS" id="Dbu13" name="onoff"><img src="img/diagram/diagram_S_toyoda_off.png" /></div>
+				<div class="spbuS" id="Dbu14" name="onoff"><img src="img/diagram/diagram_S_kawanakajima_off.png" /></div>
+				<div class="spbuS" id="Dbu15" name="onoff"><img src="img/diagram/diagram_S_champ_off.png" /></div>
+				<div class="spbuS" id="Dbu16" name="onoff"><img src="img/diagram/diagram_S_morita_off.png" /></div>
+				<div class="spbuS" id="Dbu17" name="onoff"><img src="img/diagram/diagram_S_kotarou_off.png" /></div>
+				<br clear="all" />
+				<!-- 関係タグ -->
+				<div id="rela0" class="relatbox"></div>
+				<div id="rela1" class="relatbox"></div>
+				<div id="rela2" class="relatbox"></div>
+				<div id="rela3" class="relatbox"></div>
+				<div id="rela4" class="relatbox"></div>
+				<div id="rela5" class="relatbox"></div>
+				<div id="rela6" class="relatbox"></div>
+				<div id="rela7" class="relatbox"></div>
+				<div id="rela8" class="relatbox"></div>
+				<div id="rela9" class="relatbox"></div>
+				<div id="rela10" class="relatbox"></div>
+				<div id="rela11" class="relatbox"></div>
+				<div id="rela12" class="relatbox"></div>
+				<div id="rela13" class="relatbox"></div>
+				<div id="rela14" class="relatbox"></div>
+				<div id="rela15" class="relatbox"></div>
+				<div id="rela16" class="relatbox"></div>
+				<div id="rela17" class="relatbox"></div>
+			</div>
+
+		<div id="copybox"><img src="img/software.png"></div>
+	</div>
+
+<!-- ▼ロゴ + メニュー▼ -->
+	<div id="menubox">
+	<div id="logo" class="pjax">
+		<div id="logobox">
+			<ul id="navibox">
+				<li class="concept" id="navi_concept"><a href="concept.html"><span><img src="img/new.png"></span></a></li>
+				<li class="story" id="navi_story"><a href="story.html"><span><img src="img/new.png"></span></a></li>
+				<li class="chara" id="navi_chara"><a href="chara.html"><span><img src="img/new.png"></span></a></li>
+				<li class="gallery" id="navi_gallery"><a href="gallery.html"><span><img src="img/new.png"></span></a></li>
+				<li class="movie" id="navi_movie"><a href="movie.html"><span><img src="img/new.png"></span></a></li>
+				<li class="special" id="navi_special"><a href="special.html"><span><img src="img/new.png"></span></a></li>
+				<li class="spec" id="navi_spec"><a href="spec.html"><span><img src="img/new.png"></span></a></li>
+			</ul>
+	
+			<div id="navisub">
+				<div class="concept" id="navi_concept_sub"><a href="concept.html">コンセプト</a></div>
+				<div class="story" id="navi_story_sub"><a href="story.html">ストーリー</a></div>
+				<div class="chara" id="navi_chara_sub"><a href="chara.html">キャラクター</a></div>
+				<div class="gallery" id="navi_gallery_sub"><a href="gallery.html">ギャラリー</a></div>
+				<div class="movie" id="navi_movie_sub"><a href="movie.html">ムービー</a></div>
+				<div class="special" id="navi_special_sub"><a href="special.html">スペシャル</a></div>
+				<div class="spec" id="navi_spec_sub"><a href="spec.html">スペック</a></div>
+			</div>
+			
+			<div id="navitxtbox">
+				<img src="img/navi/navi_txt_consept_off.png" id="navi_concept_txt">
+				<img src="img/navi/navi_txt_story_off.png" id="navi_story_txt">
+				<img src="img/navi/navi_txt_chara_off.png" id="navi_chara_txt">
+				<img src="img/navi/navi_txt_gallery_off.png" id="navi_gallery_txt">
+				<img src="img/navi/navi_txt_movie_off.png" id="navi_movie_txt">
+				<img src="img/navi/navi_txt_special_off.png" id="navi_special_txt">
+				<img src="img/navi/navi_txt_spec_off.png" id="navi_spec_txt">
+			</div>
+			<div id="menuborder_left"></div>
+			<div id="menuborder_right"></div>
+			<a href="index.html" id="logoimg">『見上げてごらん、夜空の星を FINE DAYS』</a>
+		</div>
+	</div>
+	</div>
+	<!-- ▲ロゴ + メニュー▲ -->
+
+
+</div>
+<!-- ▲pjaxで入れ替わる範囲▲ -->
+
+
+
+<!-- ▼フッター▼ -->
+<div id="footer">
+	<div id="footbox">
+		<div id="topicsbox" class="pjax">
+			<a href="../pack/index.html"><img src="img/topics/topics000_off.png"></a>
+			<a href="trialmovie.html"><span><img src="img/new.png"></span><img src="img/topics/topics005_off.png"></a>
+			<a href="shop.html"><img src="img/topics/topics002_off.png"></a>
+			<a href="tokuten.html"><img src="img/topics/topics004_off.png"></a>
+		</div>
+		<a href="http://www.pulltop.com/home.php" id="brand"><img src="img/pulltop.png" /></a>
+		<!-- ▼MUSIC -->
+		<div id="jquery_jplayer_1" class="jp-jplayer" ></div>
+		<div id="jp_container_1">
+			<div class="jp-gui ui-widget ui-corner-all">
+				<ul>
+				<li class="jp-mute ui-state-default ui-corner-all"><a href="javascript:;" class="jp-mute ui-icon ui-icon-volume-off" tabindex="1" title="mute">mute</a></li>
+				<li class="jp-unmute ui-state-default ui-state-active ui-corner-all"><a href="javascript:;" class="jp-unmute ui-icon ui-icon-volume-off" tabindex="1" title="unmute">unmute</a></li>
+				</ul>
+				<div class="jp-volume-slider"></div>
+			</div>
+		</div>
+		<!-- ▲MUSIC -->
+		<div id="twitter">
+			<a href="https://twitter.com/share" class="twitter-share-button" data-text="『見上げてごらん、夜空の星を FINE DAYS』
+企画・シナリオ：紺野アスタ、シナリオ：高嶋栄二/折畑啓助、キャラデザ・原画：八島タカヒロ/基井あゆむ/ベコ太郎 #夜空の星を " style="margin-right:100px;">Tweet</a>
+			 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+		</div>
+		<address>Copyright &copy; 2016 Willplus / PULLTOP  All rights reserved.</address>
+	</div>
+</div>
+<!-- ▲フッター▲ -->
+
+
+</body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-17126735-6', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<script type="text/javascript" src="./js/jquery.preload.js"></script>
+<script type="text/javascript" src="./js/jquery.pjax.min.js"></script>
+<script type="text/javascript" src="./js/jquery-ui.js"></script>
+<script type="text/javascript" src="./js/jquery.colorbox.js"></script>
+<script type="text/javascript" src="./js/import.js"></script> 
+</html>

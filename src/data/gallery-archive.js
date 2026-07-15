@@ -35,12 +35,12 @@ export const galleryPreview = [
     src: `${O}/saya-if-summer.png`,
   },
   {
-    id: "cg05",
-    title: "秘密天文台",
-    caption: "小时候在屋顶一起看星星的起点。",
-    alt: "天之川沙夜 · 幼年观星",
-    category: "CG",
-    src: `${O}/cg05-full.jpg`,
+    id: "fd-telescope",
+    title: "望远镜",
+    caption: "FINE DAYS 立绘：怀里的镜筒与蓝橙异瞳。",
+    alt: "天之川沙夜 · 望远镜立绘",
+    category: "立绘",
+    src: `${O}/saya-fd-telescope.png`,
   },
   {
     id: "cg06",
@@ -51,12 +51,12 @@ export const galleryPreview = [
     src: `${O}/cg06-full.jpg`,
   },
   {
-    id: "cg12",
-    title: "夜色里的吻",
-    caption: "观星之后的温柔约定。",
-    alt: "天之川沙夜 · 夜色之吻",
+    id: "cg-beach",
+    title: "海边刨冰",
+    caption: "IF 泳装 CG：廊下一点绿冰，只属于她。",
+    alt: "天之川沙夜 · 海边刨冰",
     category: "CG",
-    src: `${O}/cg12-full.jpg`,
+    src: `${O}/cg-if-beach-icecream.jpg`,
   },
 ];
 
@@ -224,6 +224,16 @@ export const officialArchive = [
     thumb: `${O}/saya-child2.jpg`,
   },
   {
+    id: "art-fd-telescope",
+    title: "望远镜与制服",
+    caption: "FINE DAYS 官方立绘：怀里抱着 Vixen 镜筒，异色瞳微微睁大。",
+    alt: "天之川沙夜 · 望远镜立绘（FD）",
+    source: "official-art",
+    badge: "FD 立绘",
+    src: `${O}/saya-fd-telescope.png`,
+    thumb: `${O}/saya-fd-telescope.png`,
+  },
+  {
     id: "art-mv",
     title: "主视觉",
     caption: "游戏官方主视觉。仰望夜空的那一刻——预览对准左侧的沙夜。",
@@ -235,7 +245,7 @@ export const officialArchive = [
     // 全图为多人构图；预览裁切对准左侧银发异瞳的沙夜
     objectPosition: "14% 42%",
   },
-  // 官方 CG：仅全年龄向（已排除 H 场景）
+  // 官方 CG：仅全年龄向（已排除 H 场景）；多人图仅保留裁成单人沙夜的版本
   {
     id: "cg-05",
     title: "秘密天文台",
@@ -247,6 +257,16 @@ export const officialArchive = [
     // 原 thum05 为粉发角色特写；改用全图并裁切对准中间银发异瞳的沙夜
     thumb: `${O}/cg05-full.jpg`,
     objectPosition: "50% 42%",
+  },
+  {
+    id: "cg-child-board",
+    title: "黑板前的幼年",
+    caption: "本篇官方 CG：教室黑板前的粉外套小沙夜，蓝橙瞳在绿板上发亮。",
+    alt: "天之川沙夜 · 黑板幼年 CG",
+    source: "official-cg",
+    badge: "官方 CG",
+    src: `${O}/cg-child-blackboard.jpg`,
+    thumb: `${O}/cg-child-blackboard.jpg`,
   },
   {
     id: "cg-06",
@@ -279,6 +299,26 @@ export const officialArchive = [
     thumb: `${O}/thum12.png`,
   },
   {
+    id: "cg-if-beach",
+    title: "海边刨冰",
+    caption: "IF 官方 CG：白水手泳装，廊下对着镜头递出一点绿冰。",
+    alt: "天之川沙夜 · 海边刨冰（IF）",
+    source: "official-cg",
+    badge: "IF CG",
+    src: `${O}/cg-if-beach-icecream.jpg`,
+    thumb: `${O}/cg-if-beach-icecream.jpg`,
+  },
+  {
+    id: "cg-if-water",
+    title: "水花里的沙夜",
+    caption: "从 IF 戏水 CG 中单独截取沙夜：白泳装与飞溅的水花。",
+    alt: "天之川沙夜 · 戏水特写（IF）",
+    source: "official-cg",
+    badge: "IF CG",
+    src: `${O}/cg-if-water-saya.jpg`,
+    thumb: `${O}/cg-if-water-saya.jpg`,
+  },
+  {
     id: "cg-if-q-uniform",
     title: "Q 版 · 夏制服搭档",
     caption: "IF 官方 Q 版：沙夜与光背对背，两人都穿着夏日校园制服。",
@@ -298,6 +338,16 @@ export const officialArchive = [
     badge: "IF CG",
     src: `${O}/cg-if-q-saya.jpg`,
     thumb: `${O}/cg-if-q-saya.jpg`,
+  },
+  {
+    id: "cg-if-q-solo",
+    title: "Q 版 · 汗湿夏装",
+    caption: "从 IF 双人 Q 图中截取：只留捂脸冒汗的银发沙夜。",
+    alt: "天之川沙夜 · Q 版夏装单人（IF）",
+    source: "official-cg",
+    badge: "IF CG",
+    src: `${O}/cg-if-q-saya-solo.jpg`,
+    thumb: `${O}/cg-if-q-saya-solo.jpg`,
   },
 ];
 
