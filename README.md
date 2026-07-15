@@ -8,6 +8,7 @@
 - **完整图集页** `gallery.html`
   - 官方立绘（PULLTOP / Bangumi）
   - 官方 CG（官网 Gallery 中沙夜出场的公开图）
+  - 社区同人（粉丝 / 第三方全年龄向创作）
   - AI 创作（本地文件夹自动扫描）
 - **完整星笺页** `quotes.html`
   - 沙夜台词 / 关于她 / 星空名句 / **AI仿作**（按角色气质新写，明确标注非原台词）
@@ -49,6 +50,7 @@ companion.html          陪伴
 server.js               本地静态服务 + AI 图扫描 API
 assets/gallery/
   official/             官方图片缓存
+  community/            社区同人（全年龄向）
   ai/                   你的 AI 创作（丢文件即可）
 src/
   main.js               首页逻辑
@@ -70,6 +72,7 @@ src/
 - 官方立绘 / CG：PULLTOP《見上げてごらん、夜空の星を》官网公开素材
 - IF 换装立绘 / 宣传图：PULLTOP《Interstellar Focus》官网公开素材
 - 部分设定图：Bangumi 角色页
+- 社区同人：粉丝 / 第三方公开创作（Danbooru / Pixiv / X 等），版权归原画师
 - 低分辨率素材经 LANCZOS 放大与锐化后入库（见 `scripts/process_official_images.py`）
 - 图集仅收录全年龄向内容（已排除 H / 裸露等 18+ 场景）
 - 仅供个人欣赏的同人向展示，请勿商业使用

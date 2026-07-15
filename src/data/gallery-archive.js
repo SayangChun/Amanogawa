@@ -1,15 +1,18 @@
 /**
  * 完整图集数据
- * source: official-art | official-cg | ai
+ * source: official-art | official-cg | community | ai
  * 官方图已筛出有沙夜出场的条目，且仅保留全年龄向内容
+ * 社区同人：第三方 / 粉丝创作，非官方
  */
 
 const O = "./assets/gallery/official";
+const C = "./assets/gallery/community";
 
 export const archiveFilters = [
   { id: "all", label: "全部" },
   { id: "official-art", label: "官方立绘" },
   { id: "official-cg", label: "官方 CG" },
+  { id: "community", label: "社区同人" },
   { id: "ai", label: "AI 创作" },
 ];
 
@@ -46,6 +49,14 @@ export const galleryPreview = [
     alt: "天之川沙夜 · 官方 CG 晴空",
     category: "CG",
     src: `${O}/cg06-full.jpg`,
+  },
+  {
+    id: "cg12",
+    title: "夜色里的吻",
+    caption: "观星之后的温柔约定。",
+    alt: "天之川沙夜 · 夜色之吻",
+    category: "CG",
+    src: `${O}/cg12-full.jpg`,
   },
 ];
 
@@ -226,5 +237,89 @@ export const officialArchive = [
     badge: "官方 CG",
     src: `${O}/cg12-full.jpg`,
     thumb: `${O}/thum12.png`,
+  },
+];
+
+/**
+ * 社区 / 第三方同人（全年龄向）
+ * 版权归原画师；仅供个人欣赏展示
+ */
+export const communityArchive = [
+  {
+    id: "com-cardigan-smile",
+    title: "开衫与微笑",
+    caption: "蓝开衫与绿发带，异色瞳轻轻对上视线。画师 sakuratoru。",
+    alt: "天之川沙夜 · 开衫微笑（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "sakuratoru",
+    src: `${C}/community-cardigan-smile.jpg`,
+    thumb: `${C}/community-cardigan-smile.jpg`,
+  },
+  {
+    id: "com-starry-lookback",
+    title: "星空回眸",
+    caption: "夏夜与望远镜，银发在星座之间回头。画师 rei。",
+    alt: "天之川沙夜 · 星空回眸（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "rei (farta litia)",
+    src: `${C}/community-starry-lookback.jpg`,
+    thumb: `${C}/community-starry-lookback.jpg`,
+  },
+  {
+    id: "com-window-stars",
+    title: "窗边流星",
+    caption: "窗框外的流星与星空，夏装沙夜坐在光里。画师 mame4ba2525。",
+    alt: "天之川沙夜 · 窗边流星（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "mame4ba2525",
+    src: `${C}/community-window-stars.jpg`,
+    thumb: `${C}/community-window-stars.jpg`,
+  },
+  {
+    id: "com-birthday-point",
+    title: "生日快乐",
+    caption: "坐姿制服，指着自己——「今天是我的日子哦」。画师 mame4ba2525。",
+    alt: "天之川沙夜 · 生日快乐（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "mame4ba2525",
+    src: `${C}/community-birthday-point.jpg`,
+    thumb: `${C}/community-birthday-point.jpg`,
+  },
+  {
+    id: "com-newyear-kimono",
+    title: "新年振袖",
+    caption: "换了发型的新年贺图，双手藏在振袖里。画师 mame4ba2525。",
+    alt: "天之川沙夜 · 新年振袖（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "mame4ba2525",
+    src: `${C}/community-newyear-kimono.jpg`,
+    thumb: `${C}/community-newyear-kimono.jpg`,
+  },
+  {
+    id: "com-love-letter",
+    title: "情书",
+    caption: "侧脸、绿发带与一封还没递出去的信。画师 kisuish。",
+    alt: "天之川沙夜 · 情书（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "kisuish",
+    src: `${C}/community-love-letter.jpg`,
+    thumb: `${C}/community-love-letter.jpg`,
+  },
+  {
+    id: "com-desk-side",
+    title: "桌边侧影",
+    caption: "红发箍与绿裙，在桌边安静坐着。画师 kasu。",
+    alt: "天之川沙夜 · 桌边侧影（社区同人）",
+    source: "community",
+    badge: "社区同人",
+    artist: "kasu",
+    src: `${C}/community-desk-side.jpg`,
+    thumb: `${C}/community-desk-side.jpg`,
   },
 ];

@@ -157,7 +157,7 @@ const renderGallery = () => `
       <div>
         <p class="eyebrow">Gallery</p>
         <h2>精选图集</h2>
-        <p class="section-desc">首页只放几张代表作，更多官方 CG 与 AI 创作在完整图集里。</p>
+        <p class="section-desc">首页只放几张官方代表作，更多 CG、社区同人与 AI 创作在完整图集里。</p>
       </div>
       <a class="btn btn-primary" href="./gallery.html">打开完整图集</a>
     </div>
@@ -186,6 +186,7 @@ const renderGallery = () => `
     </div>
     <div class="gallery-more">
       <a class="btn btn-ghost" href="./gallery.html#official-cg">官方 CG</a>
+      <a class="btn btn-ghost" href="./gallery.html#community">社区同人</a>
       <a class="btn btn-ghost" href="./gallery.html#ai">AI 创作</a>
       <a class="btn btn-ghost" href="./gallery.html#official-art">官方立绘</a>
     </div>

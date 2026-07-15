@@ -2,6 +2,7 @@ import { saya } from "./data/saya.js";
 import {
   archiveFilters,
   officialArchive,
+  communityArchive,
 } from "./data/gallery-archive.js";
 import { aiGalleryManual } from "./data/ai-gallery.js";
 import {
@@ -132,7 +133,7 @@ async function loadAiItems() {
 }
 
 function mergeItems(aiItems) {
-  return [...officialArchive, ...aiItems];
+  return [...officialArchive, ...communityArchive, ...aiItems];
 }
 
 function countsFor(items) {
@@ -140,6 +141,7 @@ function countsFor(items) {
     all: items.length,
     "official-art": items.filter((i) => i.source === "official-art").length,
     "official-cg": items.filter((i) => i.source === "official-cg").length,
+    community: items.filter((i) => i.source === "community").length,
     ai: items.filter((i) => i.source === "ai").length,
   };
 }
@@ -235,13 +237,14 @@ function renderPageShell() {
           </p>
           <h1>沙夜的图集</h1>
           <p class="archive-lede">
-            官方立绘与筛选后的宣传 CG，以及你用 AI 为她留下的新模样。
+            官方立绘与筛选后的宣传 CG，社区同人画作，以及你用 AI 为她留下的新模样。
             点击任意图片可全屏浏览，方向键切换。
           </p>
           <div class="archive-stats">
             <div class="stat-pill"><span>${counts.all}</span>全部</div>
             <div class="stat-pill"><span>${counts["official-art"]}</span>立绘</div>
             <div class="stat-pill"><span>${counts["official-cg"]}</span>CG</div>
+            <div class="stat-pill"><span>${counts.community}</span>同人</div>
             <div class="stat-pill"><span>${counts.ai}</span>AI</div>
           </div>
         </div>
@@ -250,6 +253,7 @@ function renderPageShell() {
           <ul>
             <li><strong>官方立绘</strong> — PULLTOP / Bangumi 角色图</li>
             <li><strong>官方 CG</strong> — 官网 Gallery 中沙夜出场的公开 CG</li>
+            <li><strong>社区同人</strong> — 粉丝 / 第三方创作（非官方，版权归画师）</li>
             <li><strong>AI 创作</strong> — 你放入 <code>assets/gallery/ai</code> 的图片</li>
           </ul>
           <a class="btn btn-ghost" href="./index.html">返回首页</a>
@@ -294,11 +298,12 @@ function applyFilter(filter) {
   });
 
   const stats = document.querySelectorAll(".archive-stats .stat-pill span");
-  if (stats.length === 4) {
+  if (stats.length >= 5) {
     stats[0].textContent = String(counts.all);
     stats[1].textContent = String(counts["official-art"]);
     stats[2].textContent = String(counts["official-cg"]);
-    stats[3].textContent = String(counts.ai);
+    stats[3].textContent = String(counts.community);
+    stats[4].textContent = String(counts.ai);
   }
 
   const mount = document.querySelector("#archive-mount");
