@@ -1753,6 +1753,464 @@ button {
   font-size: 0.95rem;
 }
 
+/* ---------- 好感度（独立页 + 共用仪表） ---------- */
+
+.affinity-page {
+  padding-top: 8px;
+}
+
+.affinity-hero {
+  padding-top: 12px;
+}
+
+.affinity-hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.affinity-presence {
+  padding: clamp(22px, 3.5vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.affinity-title {
+  margin: 8px 0 14px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 4vw, 2.55rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+}
+
+.affinity-lead {
+  margin: 0 0 12px;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  max-width: 42ch;
+}
+
+.affinity-lead a {
+  color: var(--amber-soft);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* 陪伴页入口卡片（完整仪表在好感页） */
+.affinity-entry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "label stage value"
+    "go go go";
+  gap: 6px 14px;
+  align-items: center;
+  margin: 12px 0 14px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(110, 168, 255, 0.2);
+  background:
+    linear-gradient(135deg, rgba(110, 168, 255, 0.08), rgba(232, 168, 92, 0.06)),
+    rgba(5, 10, 24, 0.3);
+  transition:
+    border-color 0.2s var(--ease),
+    transform 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+}
+
+.affinity-entry:hover {
+  border-color: rgba(232, 168, 92, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+
+.affinity-entry-label {
+  grid-area: label;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: var(--font-display);
+}
+
+.affinity-entry-stage {
+  grid-area: stage;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--amber-soft);
+}
+
+.affinity-entry-value {
+  grid-area: value;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 0.88rem;
+  justify-self: end;
+}
+
+.affinity-entry-value strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.affinity-entry-go {
+  grid-area: go;
+  font-size: 0.82rem;
+  color: var(--blue);
+  letter-spacing: 0.04em;
+}
+
+.affinity-chip {
+  text-decoration: none;
+}
+
+.affinity-chip:hover {
+  border-color: rgba(232, 168, 92, 0.55);
+  background: rgba(232, 168, 92, 0.18);
+}
+
+.affinity-roadmap {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.affinity-road-card {
+  padding: 18px 18px 16px;
+  opacity: 0.55;
+  transition: opacity 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.affinity-road-card.is-reached {
+  opacity: 1;
+}
+
+.affinity-road-card.is-current {
+  border-color: rgba(232, 168, 92, 0.4);
+  box-shadow: 0 0 0 1px rgba(232, 168, 92, 0.1), 0 0 24px rgba(110, 168, 255, 0.08);
+}
+
+.affinity-road-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.affinity-road-idx {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--blue);
+}
+
+.affinity-road-min {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.affinity-road-name {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.affinity-road-desc {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--text-soft);
+  min-height: 2.8em;
+}
+
+.affinity-unlock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.affinity-unlock-card {
+  margin: 0;
+}
+
+.affinity-empty {
+  padding: clamp(22px, 3vw, 32px);
+  color: var(--text-soft);
+  line-height: 1.75;
+}
+
+.affinity-empty-hint {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.affinity-daily-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.affinity-daily-panel {
+  padding: clamp(18px, 2.5vw, 24px);
+}
+
+.affinity-daily-title {
+  margin: 0 0 14px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.affinity-daily-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.affinity-daily-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.affinity-daily-label {
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.affinity-daily-nums {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.affinity-daily-hint {
+  margin: 4px 0 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.affinity-daily-link {
+  margin-top: 16px;
+}
+
+@media (max-width: 920px) {
+  .affinity-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.affinity-meter {
+  margin: 14px 0 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(110, 168, 255, 0.18);
+  background:
+    linear-gradient(135deg, rgba(110, 168, 255, 0.07), rgba(232, 168, 92, 0.06)),
+    rgba(5, 10, 24, 0.35);
+  transition: box-shadow 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+
+.affinity-meter.is-compact {
+  margin: 0;
+}
+
+.affinity-meter.is-pulse {
+  border-color: rgba(232, 168, 92, 0.42);
+  box-shadow: 0 0 0 1px rgba(232, 168, 92, 0.12), 0 0 24px rgba(110, 168, 255, 0.12);
+}
+
+.affinity-meter-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.affinity-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: var(--font-display);
+}
+
+.affinity-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.affinity-value strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.affinity-max {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.affinity-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(190, 210, 255, 0.1);
+  overflow: hidden;
+}
+
+.affinity-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--blue), #9ec0ff 42%, var(--amber));
+  box-shadow: 0 0 12px var(--blue-glow);
+  transition: width 0.55s var(--ease);
+  min-width: 0;
+}
+
+.affinity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  margin-top: 10px;
+}
+
+.affinity-stage {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--amber-soft);
+  letter-spacing: 0.04em;
+}
+
+.affinity-next {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.affinity-desc {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--text-soft);
+  max-width: 40ch;
+}
+
+.affinity-stage-bar {
+  margin-top: 10px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(190, 210, 255, 0.08);
+  overflow: hidden;
+}
+
+.affinity-stage-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(110, 168, 255, 0.75), rgba(232, 168, 92, 0.85));
+  transition: width 0.55s var(--ease);
+}
+
+.affinity-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 168, 92, 0.35);
+  background: rgba(232, 168, 92, 0.12);
+  color: var(--amber-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.affinity-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom, 0px) + 16px);
+  z-index: 80;
+  min-width: min(320px, calc(100vw - 32px));
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(110, 168, 255, 0.28);
+  background: rgba(8, 14, 32, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(232, 168, 92, 0.08);
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.affinity-toast.is-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.affinity-toast[data-level="up"] {
+  border-color: rgba(232, 168, 92, 0.45);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 28px rgba(232, 168, 92, 0.15);
+}
+
+.affinity-toast-title {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+  font-family: var(--font-display);
+}
+
+.affinity-toast[data-level="up"] .affinity-toast-title {
+  color: var(--amber-soft);
+}
+
+.affinity-toast-line {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.affinity-toast-pts {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .companion-hint {
   margin: 0 0 18px;
   color: var(--muted);

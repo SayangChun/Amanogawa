@@ -5,6 +5,7 @@
   "rewrites": [
     { "source": "/gallery", "destination": "/gallery.html" },
     { "source": "/quotes", "destination": "/quotes.html" },
-    { "source": "/companion", "destination": "/companion.html" }
+    { "source": "/companion", "destination": "/companion.html" },
+    { "source": "/affinity", "destination": "/affinity.html" }
   ]
 }

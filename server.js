@@ -27,6 +27,7 @@ const REWRITES = [
   { source: "/gallery", destination: "/gallery.html" },
   { source: "/quotes", destination: "/quotes.html" },
   { source: "/companion", destination: "/companion.html" },
+  { source: "/affinity", destination: "/affinity.html" },
 ];
 
 const AI_DIR = path.join(__dirname, "assets", "gallery", "ai");

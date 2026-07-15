@@ -10,6 +10,14 @@ import {
   STORAGE_KEY,
 } from "./data/companion.js";
 import {
+  gainAffinity,
+  getAffinityValue,
+  getAffinityStage,
+  getUnlockedLines,
+  ensureAffinityToastHost,
+  onAffinityChange,
+} from "./affinity-core.js";
+import {
   esc,
   imgSrc,
   bindImageFallbacks,
@@ -75,7 +83,7 @@ const periodLabels = {
   late: "深夜",
 };
 
-// ---------- storage ----------
+// ---------- companion storage（不含好感） ----------
 
 function defaultState() {
   const t = todayKey();
@@ -92,7 +100,9 @@ function loadRawState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
-    return { ...defaultState(), ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    const base = defaultState();
+    return { ...base, ...parsed };
   } catch {
     return defaultState();
   }
@@ -100,7 +110,15 @@ function loadRawState() {
 
 function saveState(state) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // 只持久化陪伴字段，避免把旧好感字段继续写回
+    const slim = {
+      firstVisit: state.firstVisit,
+      lastVisitDate: state.lastVisitDate,
+      streak: state.streak,
+      totalVisits: state.totalVisits,
+      lastDialogueId: state.lastDialogueId,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
   } catch {
     /* ignore quota / private mode */
   }
@@ -124,16 +142,24 @@ function touchVisit() {
   }
   state.lastVisitDate = today;
   saveState(state);
-  return state;
+  // 好感独立系统：陪伴日访加分
+  gainAffinity("companionVisit");
+  return loadRawState();
 }
 
 // ---------- line pool ----------
 
-function buildLinePool() {
+function buildLinePool(affinity = 0) {
   const fromCompanion = companionLines.map((l) => ({
     id: l.id,
     text: l.text,
     badge: "陪伴",
+    mood: l.mood,
+  }));
+  const fromUnlock = getUnlockedLines(affinity).map((l) => ({
+    id: l.id,
+    text: l.text,
+    badge: "心意",
     mood: l.mood,
   }));
   const fromQuotes = quotesArchive
@@ -144,14 +170,20 @@ function buildLinePool() {
       badge: q.category === "ai" ? "AI仿作" : q.badge || "星笺",
       mood: "star",
     }));
-  return [...fromCompanion, ...fromQuotes];
+  return [...fromCompanion, ...fromUnlock, ...fromQuotes];
 }
 
-const linePool = buildLinePool();
+let linePool = [];
+
+function rebuildLinePool() {
+  linePool = buildLinePool(getAffinityValue());
+}
 
 // ---------- page state ----------
 
 const visit = touchVisit();
+rebuildLinePool();
+
 const period = timePeriod();
 const greeting = pickRandom(greetings[period] || greetings.night);
 
@@ -163,9 +195,10 @@ let currentInteractionId = interactions[0]?.id || "";
 let currentInteractionReply = null;
 let lastInteractionReplyText = "";
 
-let activeDialogueId = visit.lastDialogueId && dialogues.some((d) => d.id === visit.lastDialogueId)
-  ? visit.lastDialogueId
-  : dialogues[0]?.id;
+let activeDialogueId =
+  visit.lastDialogueId && dialogues.some((d) => d.id === visit.lastDialogueId)
+    ? visit.lastDialogueId
+    : dialogues[0]?.id;
 let dialogueNodeId = dialogues.find((d) => d.id === activeDialogueId)?.start || "n0";
 
 // timer
@@ -215,9 +248,26 @@ function getNode() {
   return d?.nodes?.[dialogueNodeId] || null;
 }
 
+function renderAffinityEntry() {
+  const value = getAffinityValue();
+  const stage = getAffinityStage(value);
+  return `
+  <a class="affinity-entry glass" href="./affinity.html" id="affinity-entry">
+    <span class="affinity-entry-label">
+      <span class="dot blue"></span>
+      好感
+      <span class="dot amber"></span>
+    </span>
+    <span class="affinity-entry-stage">${esc(stage.name)}</span>
+    <span class="affinity-entry-value"><strong>${value}</strong> / 100</span>
+    <span class="affinity-entry-go">查看心意轨迹 →</span>
+  </a>`;
+}
+
 // ---------- shell render ----------
 
 function renderPresence() {
+  const stage = getAffinityStage(getAffinityValue());
   return `
   <section class="section companion-hero" id="presence">
     <div class="companion-hero-grid">
@@ -230,12 +280,14 @@ function renderPresence() {
         <h1 class="companion-title">今晚，一起看星星</h1>
         <p class="companion-greeting">「${esc(greeting?.text || "……你来了。")}」</p>
         <p class="companion-visit">${esc(visitSubtitle())}</p>
-        <p class="companion-hint">不用赶路。问候、随口互动、星笺、计时与小对话——慢慢挑一样就好。</p>
+        ${renderAffinityEntry()}
+        <p class="companion-hint">不用赶路。问候、随口互动、星笺、计时与小对话——慢慢挑一样就好。互动也会悄悄加深<a href="./affinity.html">好感</a>。</p>
         <div class="companion-jump">
           <a class="btn btn-ghost" href="#interact">随口互动</a>
           <a class="btn btn-ghost" href="#starline">今日星笺</a>
           <a class="btn btn-ghost" href="#stargaze">一起看星星</a>
           <a class="btn btn-ghost" href="#dialogue">小对话</a>
+          <a class="btn btn-primary" href="./affinity.html">好感页</a>
         </div>
       </div>
       <div class="companion-portrait glass">
@@ -251,6 +303,7 @@ function renderPresence() {
         <div class="companion-portrait-meta">
           <span class="eye-chip blue">Blue</span>
           <span class="eye-chip amber">Amber</span>
+          <a class="affinity-chip" href="./affinity.html" title="打开好感页">${esc(stage.short)}</a>
           <span class="companion-portrait-name">${esc(saya.name)}</span>
         </div>
       </div>
@@ -441,7 +494,7 @@ function renderDialogue() {
           <div class="dialogue-choices">
             ${choices
               .map(
-                (c, i) => `
+                (c) => `
               <button type="button" class="dialogue-choice" data-choice-next="${esc(c.next)}">
                 ${esc(c.label)}
               </button>`,
@@ -466,10 +519,22 @@ function renderPage() {
     </main>
     ${renderSiteFooter(saya)}
   `;
+  ensureAffinityToastHost();
   bindImageFallbacks(app);
   bindHeader("companion");
   bindReveal(app);
   syncTimerDom();
+}
+
+function refreshAffinityEntry() {
+  const host = document.querySelector("#affinity-entry");
+  if (host) {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = renderAffinityEntry();
+    host.replaceWith(wrap.firstElementChild);
+  }
+  const chip = document.querySelector(".affinity-chip");
+  if (chip) chip.textContent = getAffinityStage(getAffinityValue()).short;
 }
 
 // ---------- timer logic ----------
@@ -493,9 +558,12 @@ function tickTimer(ts) {
     timerRunning = false;
     timerPaused = false;
     timerEnded = true;
-    timerDoneText = pickRandom(timerDoneLines.map((t, i) => ({ id: String(i), text: t })))?.text || timerDoneLines[0];
+    timerDoneText =
+      pickRandom(timerDoneLines.map((t, i) => ({ id: String(i), text: t })))?.text ||
+      timerDoneLines[0];
     stopTimerLoop();
     syncTimerDom();
+    gainAffinity("timerDone", { presetId: timerPresetId });
     return;
   }
   syncTimerDom();
@@ -560,7 +628,13 @@ function syncTimerDom() {
   }
   if (toggle) {
     toggle.textContent =
-      timerRunning && !timerPaused ? "暂停" : timerEnded ? "再来一次" : timerPaused ? "继续" : "开始";
+      timerRunning && !timerPaused
+        ? "暂停"
+        : timerEnded
+          ? "再来一次"
+          : timerPaused
+            ? "继续"
+            : "开始";
   }
   if (resetBtn) {
     const pristine = !timerRunning && !timerEnded && timerRemainMs === timerTotalMs;
@@ -605,7 +679,13 @@ function selectDialogue(id, restart = true) {
 
 function advanceDialogue(nextId) {
   dialogueNodeId = nextId;
+  gainAffinity("dialogueChoice");
   refreshDialogueSection();
+  const node = getNode();
+  const isEnd = !(node?.choices?.length);
+  if (isEnd) {
+    gainAffinity("dialogueComplete", { dialogueId: activeDialogueId });
+  }
 }
 
 function restartDialogue() {
@@ -639,7 +719,6 @@ function refreshStarline() {
   bubble.querySelector(".companion-bubble-text").textContent = `「${currentLine.text}」`;
   bubble.querySelector(".companion-bubble-badge").textContent = currentLine.badge || "陪伴";
   bubble.classList.remove("is-pop");
-  // force reflow for animation restart
   void bubble.offsetWidth;
   bubble.classList.add("is-pop");
 }
@@ -662,6 +741,7 @@ function runInteraction(interactionId, again = false) {
   if (!reply) return;
   currentInteractionReply = reply;
   lastInteractionReplyText = reply.text;
+  gainAffinity("interact");
   refreshInteractSection();
 }
 
@@ -750,6 +830,11 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden && timerRunning && !timerPaused) {
     pauseTimer();
   }
+});
+
+onAffinityChange((evt) => {
+  refreshAffinityEntry();
+  if (evt.leveled) rebuildLinePool();
 });
 
 // ---------- boot ----------

@@ -709,5 +709,5 @@ export const dialogues = [
   },
 ];
 
-/** localStorage key */
+/** 陪伴页 localStorage key（回访 / 对话进度；好感见 affinity 独立存储） */
 export const STORAGE_KEY = "amanogawa-companion-v1";

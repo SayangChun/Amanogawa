@@ -19,6 +19,12 @@
   - 随机星笺气泡、一起看星星计时
   - 回访连续天数（本机 localStorage）
   - 多主题分支小对话（气质整理向，非剧本逐字）
+  - 行为会联动独立好感系统（入口卡片跳转好感页）
+- **好感页** `affinity.html`（独立）
+  - 0–100 好感度与星象阶段星图
+  - 心意一拍 / 送星等本页互动
+  - 已解锁心意句、今日各来源余量
+  - 本机独立 localStorage；可从旧陪伴存储自动迁移
 
 ## 运行
 
@@ -30,6 +36,7 @@ npm start
 - 图集：http://localhost:3000/gallery.html
 - 星笺：http://localhost:3000/quotes.html
 - 陪伴：http://localhost:3000/companion.html
+- 好感：http://localhost:3000/affinity.html
 
 ## 添加你的 AI 图
 
@@ -43,7 +50,7 @@ npm start
 ## 目录
 
 ```
-index.html / gallery.html / quotes.html / companion.html
+index.html / gallery.html / quotes.html / companion.html / affinity.html
 server.js                 本地静态服务 + AI 图扫描 API
 site.webmanifest          PWA 清单
 vercel.json               部署路由
@@ -58,6 +65,8 @@ src/
   gallery-page.js         图集页
   quotes-page.js          星笺页
   companion-page.js       陪伴页
+  affinity-page.js        好感页
+  affinity-core.js        好感存储 / 加分 / toast（跨页共用）
   shared.js               星空 / 灯箱 / 导航共用
   styles.css
   data/
@@ -66,6 +75,7 @@ src/
     ai-gallery.js         AI 图手动清单（可选）
     quotes.js / notes.js
     companion.js          陪伴文案与小对话
+    affinity.js           好感阶段 / 规则 / 心意互动
 ```
 
 ## 来源说明

@@ -36,6 +36,7 @@ const renderHero = () => `
       <div class="hero-actions">
         <a class="btn btn-primary" href="./gallery.html">进入完整图集</a>
         <a class="btn btn-ghost" href="./companion.html">去陪伴</a>
+        <a class="btn btn-ghost" href="./affinity.html">好感</a>
         <a class="btn btn-ghost" href="#profile">查看档案</a>
       </div>
       <ul class="hero-meta">

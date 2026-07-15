@@ -207,6 +207,7 @@ export function renderSiteHeader({ active = "home", base = "." } = {}) {
   const gallery = `${base}/gallery.html`;
   const quotes = `${base}/quotes.html`;
   const companion = `${base}/companion.html`;
+  const affinity = `${base}/affinity.html`;
   return `
   <header class="site-header" id="top">
     <a class="brand" href="${home}">
@@ -225,6 +226,7 @@ export function renderSiteHeader({ active = "home", base = "." } = {}) {
       <a href="${gallery}" data-nav="gallery" class="${active === "gallery" ? "is-current" : ""}">图集</a>
       <a href="${quotes}" data-nav="quotes" class="${active === "quotes" ? "is-current" : ""}">星笺</a>
       <a href="${companion}" data-nav="companion" class="${active === "companion" ? "is-current" : ""}">陪伴</a>
+      <a href="${affinity}" data-nav="affinity" class="${active === "affinity" ? "is-current" : ""}">好感</a>
       <a href="${home}#notes" data-nav="notes">备注</a>
     </nav>
   </header>`;
@@ -242,7 +244,7 @@ export function renderSiteFooter(saya) {
     </div>
     <p class="footer-title">${esc(saya.name)}</p>
     <p class="footer-sub">${esc(saya.series)} · ${esc(saya.nameRomaji)}</p>
-    <p class="footer-hint">陪伴页已就绪——想静一静的时候，去那里一起看星星吧。</p>
+    <p class="footer-hint">陪伴页一起看星星 · 好感页慢慢靠近——想静一静的时候，任选其一。</p>
     <p class="footer-credit">Fan tribute · 官方图源自 PULLTOP / Bangumi · 仅供个人欣赏</p>
     <p class="footer-meta">
       <span>作者 · <a href="https://github.com/SayangChun" target="_blank" rel="noopener noreferrer">SayangChun</a></span>
@@ -258,7 +260,7 @@ export function bindReveal(root = document) {
   // 子元素即便已 is-visible 也看不见，表现就是「闪一下后整区消失」。
   const revealables = [
     ...root.querySelectorAll(
-      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue, .companion-interact",
+      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue, .companion-interact, .affinity-presence, .affinity-road-card, .affinity-unlock-card, .affinity-daily-panel, .affinity-empty, .affinity-entry",
     ),
   ].filter((el) => !el.classList.contains("is-visible"));
 
