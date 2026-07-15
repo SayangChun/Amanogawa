@@ -108,12 +108,29 @@ def main() -> None:
         save_jpg(im, OUT / f"cg{num}-full.jpg")
         results.append(f"cg{num} upscaled")
 
-    # IF summer uniforms
+    # IF summer uniforms (full-body bases + smile)
     for src, dest in [
         ("if_chara01_00_00.png", "saya-if-summer.png"),
         ("if_chara01_00_01.png", "saya-if-summer-smile.png"),
     ]:
         im = Image.open(RAW / src).convert("RGBA")
+        im = crop_if_blue_border(im)
+        im = upscale(im, 1.5, 2400)
+        save_png(im, OUT / dest)
+        results.append(dest)
+
+    # IF summer uniform expression face-layers composited onto base body
+    body_summer = RAW / "if_chara01_00_00.png"
+    for face_name, dest in [
+        ("if_chara01_00_02.png", "saya-if-summer-shy.png"),
+        ("if_chara01_00_03.png", "saya-if-summer-soft.png"),
+        ("if_chara01_00_04.png", "saya-if-summer-pout.png"),
+        ("if_chara01_00_05.png", "saya-if-summer-teary.png"),
+    ]:
+        face = RAW / face_name
+        if not (body_summer.exists() and face.exists()):
+            continue
+        im = composite_face(body_summer, face)
         im = crop_if_blue_border(im)
         im = upscale(im, 1.5, 2400)
         save_png(im, OUT / dest)
