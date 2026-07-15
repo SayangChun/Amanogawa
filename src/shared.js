@@ -244,6 +244,11 @@ export function renderSiteFooter(saya) {
     <p class="footer-sub">${esc(saya.series)} · ${esc(saya.nameRomaji)}</p>
     <p class="footer-hint">陪伴页已就绪——想静一静的时候，去那里一起看星星吧。</p>
     <p class="footer-credit">Fan tribute · 官方图源自 PULLTOP / Bangumi · 仅供个人欣赏</p>
+    <p class="footer-meta">
+      <span>作者 · <a href="https://github.com/SayangChun" target="_blank" rel="noopener noreferrer">SayangChun</a></span>
+      <span class="footer-meta-sep" aria-hidden="true">·</span>
+      <span>开源 · <a href="https://github.com/SayangChun/Amanogawa" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+    </p>
   </footer>`;
 }
 
