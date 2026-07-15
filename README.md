@@ -43,28 +43,29 @@ npm start
 ## 目录
 
 ```
-index.html              首页
-gallery.html            完整图集
-quotes.html             完整星笺
-companion.html          陪伴
-server.js               本地静态服务 + AI 图扫描 API
-assets/gallery/
-  official/             官方图片缓存
-  community/            社区同人（全年龄向）
-  ai/                   你的 AI 创作（丢文件即可）
+index.html / gallery.html / quotes.html / companion.html
+server.js                 本地静态服务 + AI 图扫描 API
+site.webmanifest          PWA 清单
+vercel.json               部署路由
+assets/
+  gallery/
+    official/             官方立绘 / CG
+    community/            社区同人（全年龄向）
+    ai/                   AI 创作（丢文件即可）
+  favicon-*.png / icon-*  站点图标
 src/
-  main.js               首页逻辑
-  gallery-page.js       图集页逻辑
-  quotes-page.js        星笺页逻辑
-  companion-page.js     陪伴页逻辑
-  shared.js             星空 / 灯箱 / 导航共用
+  main.js                 首页
+  gallery-page.js         图集页
+  quotes-page.js          星笺页
+  companion-page.js       陪伴页
+  shared.js               星空 / 灯箱 / 导航共用
   styles.css
   data/
-    saya.js             角色档案
-    gallery-archive.js  官方图清单 + 首页精选
-    ai-gallery.js       AI 图手动清单（可选）
+    saya.js               角色档案
+    gallery-archive.js    图集清单 + 首页精选
+    ai-gallery.js         AI 图手动清单（可选）
     quotes.js / notes.js
-    companion.js        陪伴文案与小对话
+    companion.js          陪伴文案与小对话
 ```
 
 ## 来源说明
@@ -73,6 +74,5 @@ src/
 - IF 换装立绘 / 宣传图：PULLTOP《Interstellar Focus》官网公开素材
 - 部分设定图：Bangumi 角色页
 - 社区同人：粉丝 / 第三方公开创作（Danbooru / Pixiv / X 等），版权归原画师
-- 低分辨率素材经 LANCZOS 放大与锐化后入库（见 `scripts/process_official_images.py`）
 - 图集仅收录全年龄向内容（已排除 H / 裸露等 18+ 场景）
 - 仅供个人欣赏的同人向展示，请勿商业使用

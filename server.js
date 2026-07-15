@@ -20,7 +20,6 @@ const mimeTypes = new Map([
   [".gif", "image/gif"],
   [".ico", "image/x-icon"],
   [".md", "text/markdown; charset=utf-8"],
-  [".ico", "image/x-icon"],
   [".webmanifest", "application/manifest+json; charset=utf-8"],
 ]);
 

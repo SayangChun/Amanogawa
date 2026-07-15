@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+*.log
+
+# Local scratch / processing workspace (do not ship)
+assets/gallery/_raw/
+scripts/
+*.tmp
