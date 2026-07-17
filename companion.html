@@ -6,7 +6,7 @@
     <title>陪伴 · 天之川沙夜</title>
     <meta
       name="description"
-      content="与天之川沙夜一起看星星：时段问候、星笺气泡、专注陪伴与短短对话。好感请见独立好感页。"
+      content="与天之川沙夜一起看星星：心事安放、时段问候、星笺气泡、专注陪伴与短短对话。好感请见独立好感页。"
     />
     <meta name="theme-color" content="#050a18" />
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png" />
@@ -20,8 +20,20 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="preload" href="./assets/bgm/night-sky.wav" as="audio" type="audio/wav" />
+    <script type="module" src="./src/bgm.js"></script>
   </head>
   <body>
+    <audio
+      id="bgm-audio"
+      autoplay
+      loop
+      preload="auto"
+      playsinline
+      src="./assets/bgm/night-sky.wav"
+      aria-hidden="true"
+      hidden
+    ></audio>
     <canvas id="starfield" aria-hidden="true"></canvas>
     <div class="aurora" aria-hidden="true"></div>
     <div class="noise" aria-hidden="true"></div>

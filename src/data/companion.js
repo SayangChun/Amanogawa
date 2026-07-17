@@ -5,6 +5,62 @@
  * 时段：5–10 晨 · 10–16 午 · 16–20 傍晚 · 20–24 夜 · 0–5 深夜
  */
 
+/** 生日当天专属问候（覆盖时段问候池） */
+export const birthdayGreetings = [
+  { text: "……今天是我的生日。你还记得的话，我会、会有一点点开心。" },
+  { text: "1 月 16 日。……不用准备什么。你来了，就算最好的礼物。" },
+  { text: "生日愿望？……嗯。希望明年，也能在同一片星下见到你。" },
+  { text: "蛋糕什么的都可以。比起那个，我想先确认——你还在。" },
+  { text: "被记得生日这种事……以前会害羞。现在，好像可以收下了。" },
+];
+
+/**
+ * 通い妻每日关心清单
+ * 勾选后沙夜回一句，并计入好感 careCheck 日额度
+ */
+export const careTasks = [
+  {
+    id: "meal",
+    label: "按时吃饭了",
+    icon: "便当",
+    replies: [
+      { text: "很好。不按时吃饭的坏习惯……今天先记你一功。", mood: "care" },
+      { text: "嗯。胃会记住你有没有认真对待自己。……我也会。", mood: "care" },
+      { text: "吃了就好。便当可以下次再带，但今天的你要先被夸一下。", mood: "soft" },
+    ],
+  },
+  {
+    id: "water",
+    label: "有好好喝水",
+    icon: "水",
+    replies: [
+      { text: "干巴巴地熬夜看星，可不行。再喝一点。……乖。", mood: "care" },
+      { text: "收到。这种小事你愿意勾上，我会比听长篇大论更安心。", mood: "soft" },
+      { text: "水杯要放在看得见的地方。这是优等生的生活小技巧。", mood: "tease" },
+    ],
+  },
+  {
+    id: "rest",
+    label: "有好好休息",
+    icon: "息",
+    replies: [
+      { text: "休息不是偷懒。是为了明天还能抬头。……也是为了让我少担心。", mood: "care" },
+      { text: "困了就睡。星会等你的……我替你看一会儿。", mood: "soft" },
+      { text: "肩膀松一点。你一绷着，我也会跟着绷。……真的。", mood: "soft" },
+    ],
+  },
+  {
+    id: "star",
+    label: "今晚抬头看过星",
+    icon: "星",
+    replies: [
+      { text: "看见了吗？哪怕只有一颗，也算我们一起记过的夜空。", mood: "star" },
+      { text: "云太厚也没关系。你抬头过，页边就会亮一下。", mood: "star" },
+      { text: "好。那今晚的记录本……也有你的名字了。不许笑。", mood: "tease" },
+    ],
+  },
+];
+
 export const greetings = {
   morning: [
     { text: "早安……你醒得比星星还早一点呢。" },
@@ -152,6 +208,17 @@ export const interactions = [
     ],
   },
   {
+    id: "anxious",
+    label: "说心里很乱",
+    hint: "焦虑 / 内耗时",
+    replies: [
+      { text: "……听得见。乱的时候，先不用整理成漂亮句子。过来坐。", mood: "soft" },
+      { text: "脑子在吵的话，把音量分我一点。……想安放的话，下面有「心事安放」。", mood: "care" },
+      { text: "不是软弱。是你还愿意承认「乱」。这比硬撑要勇敢一点。", mood: "soft" },
+      { text: "深呼吸一次。——蓝和橙两颗小星会等你。我们慢慢来。", mood: "star" },
+    ],
+  },
+  {
     id: "star-ask",
     label: "问今晚的星",
     hint: "请她当向导",
@@ -237,6 +304,62 @@ export const interactions = [
       { text: "睡吧。星会等你，我也会。……在你心里的位置。", mood: "care" },
       { text: "晚安。做个不会掉进黑暗的梦，好吗？", mood: "star" },
       { text: "……去吧。但别变成「再也不见」。那种，不行。", mood: "soft" },
+    ],
+  },
+  // —— 好感里程碑解锁互动（minAffinity）——
+  {
+    id: "walk-home",
+    label: "一起走回去",
+    hint: "同路阶段解锁",
+    minAffinity: 12,
+    replies: [
+      { text: "……好。并排走就行，不用非要说话。", mood: "soft" },
+      { text: "路灯下影子会叠在一起。……我没有特意踩你的影子。", mood: "tease" },
+      { text: "走到分叉再分开也行。反正，今晚这段是一起的。", mood: "care" },
+    ],
+  },
+  {
+    id: "sleeve-hold",
+    label: "牵一下袖口",
+    hint: "袖口阶段解锁",
+    minAffinity: 28,
+    replies: [
+      { text: "……可以。别走散就好。握太紧的话，我会先脸红。", mood: "soft" },
+      { text: "袖口借你。人多的时候，你也可以反过来拽我。", mood: "care" },
+      { text: "（轻轻点头）……这样就不算局外人了吧。", mood: "soft" },
+    ],
+  },
+  {
+    id: "share-star",
+    label: "分你一半的星",
+    hint: "分星阶段解锁",
+    minAffinity: 48,
+    replies: [
+      { text: "收到了。……另一半我还留着。不是小气，是想和你并排。", mood: "star" },
+      { text: "分星比分糖果认真多了。你可要好好收着。", mood: "tease" },
+      { text: "蓝的那半给你，橙的我留。……开玩笑的，你选。", mood: "star" },
+    ],
+  },
+  {
+    id: "read-margin",
+    label: "偷看记录本页边",
+    hint: "双星阶段解锁",
+    minAffinity: 68,
+    replies: [
+      { text: "……！不许看。页边那种……是随便写的。不算数。", mood: "tease" },
+      { text: "看到名字了？……那也是星图的一部分。你别得意。", mood: "soft" },
+      { text: "既然被发现了……就请你负责，一直出现在下一页。", mood: "care" },
+    ],
+  },
+  {
+    id: "forever-star",
+    label: "说银河的约定",
+    hint: "银河阶段解锁",
+    minAffinity: 88,
+    replies: [
+      { text: "好。说好了的话……反悔可不行。我会写进最亮的那一页。", mood: "care" },
+      { text: "天之川就是银河。你已经在里面了。……别装作听不懂。", mood: "soft" },
+      { text: "约定不用很大声。轻轻的，星也能听见。", mood: "star" },
     ],
   },
 ];
@@ -573,6 +696,56 @@ export const dialogues = [
     },
   },
   {
+    id: "inner-noise",
+    title: "心事太吵",
+    start: "n0",
+    nodes: {
+      n0: {
+        speaker: "沙夜",
+        text: "你的眉心……拧着。是外面太吵，还是里面太吵？",
+        choices: [
+          { label: "里面。脑子停不下来", next: "n1a" },
+          { label: "说不清，就是闷", next: "n1b" },
+        ],
+      },
+      n1a: {
+        speaker: "沙夜",
+        text: "停不下来的时候，硬「想通」反而会更绕。……先把那团东西，写进页边一行。字迹乱也没关系。",
+        choices: [
+          { label: "写完还是会想", next: "n2a" },
+          { label: "你能陪我停一会儿吗？", next: "n2b" },
+        ],
+      },
+      n1b: {
+        speaker: "沙夜",
+        text: "说不清也可以。不是所有云都要有名字。……我坐这儿，你不用表演没事。",
+        choices: [
+          { label: "谢谢，有你在就好一点", next: "n2b" },
+          { label: "其实怕你觉得我麻烦", next: "n2c" },
+        ],
+      },
+      n2a: {
+        speaker: "沙夜",
+        text: "会想是正常的。但你可以决定——这一分钟，只负责呼吸。下一分钟的事，下一分钟再说。",
+        choices: [{ label: "好，这一分钟先跟着你", next: "n3" }],
+      },
+      n2b: {
+        speaker: "沙夜",
+        text: "可以。安静地待着也算聊天。……肩膀松一点。你一绷，我也会跟着绷。",
+        choices: [{ label: "那我们安静一会儿", next: "n3" }],
+      },
+      n2c: {
+        speaker: "沙夜",
+        text: "麻烦？……被你需要这件事，我没有当成负担。当成局外人，才不行。",
+        choices: [{ label: "这句话我收下了", next: "n3" }],
+      },
+      n3: {
+        speaker: "沙夜",
+        text: "那就这样。想继续安放的话……页面上有「心事安放」。我不会走开的。",
+      },
+    },
+  },
+  {
     id: "late-worry",
     title: "深夜未归",
     start: "n0",
@@ -707,7 +880,62 @@ export const dialogues = [
       },
     },
   },
+  {
+    id: "secret-notebook",
+    title: "记录本页边",
+    start: "n0",
+    /** 好感「不会走散的双星」解锁 */
+    minAffinity: 68,
+    nodes: {
+      n0: {
+        speaker: "沙夜",
+        text: "……你怎么知道我有观星记录本的？……算了。既然问到了，可以看一眼封面。",
+        choices: [
+          { label: "我想看页边", next: "n1a" },
+          { label: "只看封面就好，不打扰你", next: "n1b" },
+        ],
+      },
+      n1a: {
+        speaker: "沙夜",
+        text: "页、页边不行！那里……有随便写的东西。不是诗，也不是科学。",
+        choices: [
+          { label: "是我的名字吗？", next: "n2a" },
+          { label: "那我不看，你念一句给我听", next: "n2b" },
+        ],
+      },
+      n1b: {
+        speaker: "沙夜",
+        text: "……嗯。你这样，反而让我想多说一点。封面是普通的深蓝，角上磨白了。",
+        choices: [
+          { label: "用了很久吧", next: "n2c" },
+          { label: "以后也写下去", next: "n2c" },
+        ],
+      },
+      n2a: {
+        speaker: "沙夜",
+        text: "……被猜中了。就一行。很小。像怕被星光看见似的。……但你已经看见了。",
+        choices: [{ label: "我会负责出现在下一页", next: "n3" }],
+      },
+      n2b: {
+        speaker: "沙夜",
+        text: "「天气：你在。能见度：很好。」……就这样。不许笑。笑的话今晚不陪你找星。",
+        choices: [{ label: "我不笑，我收下了", next: "n3" }],
+      },
+      n2c: {
+        speaker: "沙夜",
+        text: "会的。星星在变少，记录却想变长。——有你在的话，页数会诚实一点。",
+        choices: [{ label: "那我们一起记", next: "n3" }],
+      },
+      n3: {
+        speaker: "沙夜",
+        text: "本子合上了。……但页边的事，你已经知道了。反悔说不知道，可不行。",
+      },
+    },
+  },
 ];
 
 /** 陪伴页 localStorage key（回访 / 对话进度；好感见 affinity 独立存储） */
 export const STORAGE_KEY = "amanogawa-companion-v1";
+
+/** 进度备份格式版本 */
+export const PROGRESS_EXPORT_VERSION = 1;

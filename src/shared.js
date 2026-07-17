@@ -57,7 +57,19 @@ export function bindImageFallbacks(root = document) {
   });
 }
 
+/** 尝试应用好感主题（懒加载，避免 circular 时失败也不影响星空） */
+export function tryApplySiteAppearance() {
+  import("./affinity-core.js")
+    .then((m) => m.applySiteAppearance?.())
+    .catch(() => {});
+}
+
 export function initStarfield() {
+  tryApplySiteAppearance();
+  // 背景氛围音：与星空同启，失败不影响主流程
+  import("./bgm.js")
+    .then((m) => m.initBgm?.())
+    .catch(() => {});
   const canvas = document.getElementById("starfield");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -244,7 +256,7 @@ export function renderSiteFooter(saya) {
     </div>
     <p class="footer-title">${esc(saya.name)}</p>
     <p class="footer-sub">${esc(saya.series)} · ${esc(saya.nameRomaji)}</p>
-    <p class="footer-hint">陪伴页一起看星星 · 好感页慢慢靠近——想静一静的时候，任选其一。</p>
+    <p class="footer-hint">心事安放 · 一起看星星 · 好感页慢慢靠近——想静一静的时候，任选其一。</p>
     <p class="footer-credit">Fan tribute · 官方图源自 PULLTOP / Bangumi · 仅供个人欣赏</p>
     <p class="footer-meta">
       <span>作者 · <a href="https://github.com/SayangChun" target="_blank" rel="noopener noreferrer">SayangChun</a></span>
@@ -260,7 +272,7 @@ export function bindReveal(root = document) {
   // 子元素即便已 is-visible 也看不见，表现就是「闪一下后整区消失」。
   const revealables = [
     ...root.querySelectorAll(
-      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue, .companion-interact, .affinity-presence, .affinity-road-card, .affinity-unlock-card, .affinity-daily-panel, .affinity-empty, .affinity-entry",
+      ".trait-card, .quote-card, .quote-full-card, .note-card, .shot, .archive-card, .drop-hint, .companion-presence, .companion-portrait, .companion-bubble, .companion-timer, .companion-dialogue, .companion-interact, .companion-care, .companion-calm, .affinity-presence, .affinity-road-card, .affinity-unlock-card, .affinity-daily-panel, .affinity-empty, .affinity-entry, .affinity-backup, .affinity-appearance, .milestone-card, .birthday-banner",
     ),
   ].filter((el) => !el.classList.contains("is-visible"));
 

@@ -2,6 +2,8 @@ import { saya } from "./data/saya.js";
 import { galleryPreview } from "./data/gallery-archive.js";
 import { quotesPreview } from "./data/quotes.js";
 import { notes } from "./data/notes.js";
+import { birthdayBannerCopy, isBirthday, daysUntilBirthday } from "./birthday.js";
+import { applySiteAppearance } from "./affinity-core.js";
 import {
   esc,
   imgSrc,
@@ -18,6 +20,28 @@ const app = document.querySelector("#app");
 
 const lightbox = createLightbox(() => galleryPreview);
 
+const renderBirthdayHome = () => {
+  const copy = birthdayBannerCopy();
+  const today = isBirthday();
+  const days = daysUntilBirthday();
+  // 首页：生日当天始终显示；否则显示简洁倒计时芯片
+  if (today) {
+    return `
+    <div class="birthday-home glass is-today">
+      <p class="birthday-home-kicker">Birthday Night · 1 月 16 日</p>
+      <p class="birthday-home-title">${esc(copy.title)}</p>
+      <p class="birthday-home-text">${esc(copy.text)}</p>
+      <a class="btn btn-primary" href="./companion.html">去陪伴页收下心意</a>
+    </div>`;
+  }
+  return `
+    <p class="birthday-countdown-chip" title="沙夜的生日">
+      <span class="dot amber"></span>
+      距生日还有 <strong>${days}</strong> 天
+      <span class="dot blue"></span>
+    </p>`;
+};
+
 const renderHero = () => `
   <section class="hero" id="home">
     <div class="hero-bg-glow" aria-hidden="true"></div>
@@ -33,6 +57,7 @@ const renderHero = () => `
       </h1>
       <p class="hero-tagline">${esc(saya.tagline)}</p>
       <p class="hero-lede">${esc(saya.subtitle)}</p>
+      ${renderBirthdayHome()}
       <div class="hero-actions">
         <a class="btn btn-primary" href="./gallery.html">进入完整图集</a>
         <a class="btn btn-ghost" href="./companion.html">去陪伴</a>
@@ -264,6 +289,7 @@ app.innerHTML = `
   ${renderSiteFooter(saya)}
 `;
 
+applySiteAppearance();
 bindImageFallbacks(app);
 initStarfield();
 bindHeader("home");

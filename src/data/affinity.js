@@ -128,7 +128,233 @@ export const affinityRules = {
     group: "companion",
     hint: "每个主题首次聊完有额外心意",
   },
+  careCheck: {
+    bucket: "careCheck",
+    points: 1,
+    dailyCap: 4,
+    label: "每日关心",
+    group: "companion",
+    hint: "陪伴页勾选通い妻关心清单",
+  },
+  calmSession: {
+    bucket: "calmSession",
+    points: 2,
+    dailyCap: 4,
+    label: "心事安放",
+    group: "companion",
+    hint: "陪伴页完成一次安放仪式（每日最多计 2 次）",
+  },
+  /**
+   * 生日心意：每年一次，不走日额度（gainAffinity 内特殊处理）
+   */
+  birthdayGift: {
+    bucket: "birthdayGift",
+    points: 8,
+    dailyCap: 8,
+    oncePerYear: true,
+    label: "生日心意",
+    group: "affinity",
+    hint: "1 月 16 日当天的特别回礼（每年一次）",
+  },
 };
+
+/**
+ * 可切换的站点主题（按好感阶段解锁）
+ * body[data-theme="..."]
+ */
+export const affinityThemes = [
+  { id: "default", label: "默认夜空", min: 0, desc: "熟悉的深蓝与星尘。" },
+  { id: "blue-night", label: "蓝夜", min: 12, desc: "左眼的颜色铺满天幕——冷静、温柔。" },
+  { id: "amber-warm", label: "琥珀暖夜", min: 48, desc: "右眼的暖光，像街边一盏只为你留的灯。" },
+  { id: "milky-way", label: "银河", min: 88, desc: "蓝与橙并排。天之川就在页边。" },
+];
+
+/**
+ * 立绘边框皮肤（陪伴 / 好感肖像）
+ * 元素 class: portrait-frame--{id}
+ */
+export const affinityFrames = [
+  { id: "none", label: "素框", min: 0, desc: "最初的那一圈夜光。" },
+  { id: "soft-ring", label: "柔光环", min: 28, desc: "愿意靠近时，边框会先软下来。" },
+  { id: "dual-glow", label: "双色辉", min: 48, desc: "蓝与琥珀同时亮起。" },
+  { id: "constellation", label: "星座框", min: 88, desc: "像把约定画进星图。" },
+];
+
+/**
+ * 阶段里程碑解锁物（好感页展示；部分在陪伴页生效）
+ * kind: line | interaction | dialogue | theme | frame | feature
+ */
+export const stageRewards = [
+  {
+    stageId: "meet",
+    min: 0,
+    unlocks: [
+      {
+        id: "feat-base",
+        kind: "feature",
+        label: "基础陪伴",
+        desc: "时段问候、随口互动、星笺、看星计时与心事安放。",
+      },
+      {
+        id: "feat-calm",
+        kind: "feature",
+        label: "心事安放",
+        desc: "焦虑或内耗时：被接住 → 双星呼吸 → 写进页边抬头。",
+      },
+      {
+        id: "theme-default",
+        kind: "theme",
+        themeId: "default",
+        label: "默认夜空",
+        desc: "最初的那片星空。",
+      },
+    ],
+  },
+  {
+    stageId: "path",
+    min: 12,
+    unlocks: [
+      {
+        id: "theme-blue",
+        kind: "theme",
+        themeId: "blue-night",
+        label: "主题 · 蓝夜",
+        desc: "同路之后，夜色会偏一点蓝。",
+      },
+      {
+        id: "feat-care",
+        kind: "feature",
+        label: "通い妻关心清单",
+        desc: "吃饭、喝水、休息、抬头看星——她会认真记着。",
+      },
+      {
+        id: "interact-path",
+        kind: "interaction",
+        interactionId: "walk-home",
+        label: "互动 · 一起走回去",
+        desc: "陪伴页多一句「一起走回去」。",
+      },
+    ],
+  },
+  {
+    stageId: "sleeve",
+    min: 28,
+    unlocks: [
+      {
+        id: "frame-soft",
+        kind: "frame",
+        frameId: "soft-ring",
+        label: "边框 · 柔光环",
+        desc: "肖像外圈变得更软、更近。",
+      },
+      {
+        id: "interact-sleeve",
+        kind: "interaction",
+        interactionId: "sleeve-hold",
+        label: "互动 · 牵一下袖口",
+        desc: "人多的时候……可以让我拽一下。",
+      },
+      {
+        id: "line-sleeve",
+        kind: "line",
+        label: "心意句 · 袖口",
+        desc: "好感页与星笺池会多出专属句子。",
+      },
+    ],
+  },
+  {
+    stageId: "half-star",
+    min: 48,
+    unlocks: [
+      {
+        id: "theme-amber",
+        kind: "theme",
+        themeId: "amber-warm",
+        label: "主题 · 琥珀暖夜",
+        desc: "分你一半星之后，暖光会多一点。",
+      },
+      {
+        id: "frame-dual",
+        kind: "frame",
+        frameId: "dual-glow",
+        label: "边框 · 双色辉",
+        desc: "蓝与橙同时描边。",
+      },
+      {
+        id: "interact-half",
+        kind: "interaction",
+        interactionId: "share-star",
+        label: "互动 · 分你一半的星",
+        desc: "把看得见的光递过去。",
+      },
+      {
+        id: "line-half",
+        kind: "line",
+        label: "心意句 · 分星",
+        desc: "「今天的星，分你多一点。」",
+      },
+    ],
+  },
+  {
+    stageId: "binary",
+    min: 68,
+    unlocks: [
+      {
+        id: "dialogue-secret",
+        kind: "dialogue",
+        dialogueId: "secret-notebook",
+        label: "对话 · 记录本页边",
+        desc: "一段只对双星开放的小对话。",
+      },
+      {
+        id: "interact-margin",
+        kind: "interaction",
+        interactionId: "read-margin",
+        label: "互动 · 偷看页边",
+        desc: "……页边有你的名字。那种，不算数。",
+      },
+      {
+        id: "line-binary",
+        kind: "line",
+        label: "心意句 · 双星",
+        desc: "有你在的圈里，好像就不用假装坚强了。",
+      },
+    ],
+  },
+  {
+    stageId: "milky",
+    min: 88,
+    unlocks: [
+      {
+        id: "theme-milky",
+        kind: "theme",
+        themeId: "milky-way",
+        label: "主题 · 银河",
+        desc: "约定写进星图之后的天色。",
+      },
+      {
+        id: "frame-constellation",
+        kind: "frame",
+        frameId: "constellation",
+        label: "边框 · 星座框",
+        desc: "像把整条银河轻轻框住。",
+      },
+      {
+        id: "interact-forever",
+        kind: "interaction",
+        interactionId: "forever-star",
+        label: "互动 · 银河的约定",
+        desc: "反悔可不行——说好了的话。",
+      },
+      {
+        id: "line-milky",
+        kind: "line",
+        label: "心意句 · 银河",
+        desc: "天气：你在。能见度：很好。",
+      },
+    ],
+  },
+];
 
 /** 阶段提升时沙夜的一句（按 stage id） */
 export const affinityLevelUpLines = {

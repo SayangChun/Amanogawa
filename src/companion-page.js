@@ -2,6 +2,8 @@ import { saya } from "./data/saya.js";
 import { quotesArchive } from "./data/quotes.js";
 import {
   greetings,
+  birthdayGreetings,
+  careTasks,
   companionLines,
   timerPresets,
   timerDoneLines,
@@ -10,13 +12,26 @@ import {
   STORAGE_KEY,
 } from "./data/companion.js";
 import {
+  calmStates,
+  breathPhases,
+  calmGroundLines,
+  calmMarginPlaceholder,
+  calmCompleteLines,
+  calmStepMeta,
+} from "./data/calm.js";
+import {
   gainAffinity,
   getAffinityValue,
   getAffinityStage,
   getUnlockedLines,
   ensureAffinityToastHost,
   onAffinityChange,
+  applySiteAppearance,
+  resolveFrameId,
+  claimBirthdayGift,
+  hasClaimedBirthdayGift,
 } from "./affinity-core.js";
+import { isBirthday, birthdayBannerCopy } from "./birthday.js";
 import {
   esc,
   imgSrc,
@@ -30,7 +45,19 @@ import {
 
 const app = document.querySelector("#app");
 
-/** @typedef {{ firstVisit: string, lastVisitDate: string, streak: number, totalVisits: number, lastDialogueId?: string }} CompanionState */
+/**
+ * @typedef {{
+ *   firstVisit: string,
+ *   lastVisitDate: string,
+ *   streak: number,
+ *   totalVisits: number,
+ *   lastDialogueId?: string,
+ *   careDay?: string,
+ *   careDone?: string[],
+ *   calmDay?: string,
+ *   calmCount?: number,
+ * }} CompanionState
+ */
 
 // ---------- utils ----------
 
@@ -39,6 +66,14 @@ function todayKey(d = new Date()) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+function availableInteractions(affinity = getAffinityValue()) {
+  return interactions.filter((i) => (i.minAffinity ?? 0) <= affinity);
+}
+
+function availableDialogues(affinity = getAffinityValue()) {
+  return dialogues.filter((d) => (d.minAffinity ?? 0) <= affinity);
 }
 
 function parseDay(key) {
@@ -93,6 +128,10 @@ function defaultState() {
     streak: 0,
     totalVisits: 0,
     lastDialogueId: dialogues[0]?.id,
+    careDay: "",
+    careDone: [],
+    calmDay: "",
+    calmCount: 0,
   };
 }
 
@@ -102,7 +141,12 @@ function loadRawState() {
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
     const base = defaultState();
-    return { ...base, ...parsed };
+    return {
+      ...base,
+      ...parsed,
+      careDone: Array.isArray(parsed.careDone) ? parsed.careDone.map(String) : [],
+      calmCount: Number.isFinite(Number(parsed.calmCount)) ? Number(parsed.calmCount) : 0,
+    };
   } catch {
     return defaultState();
   }
@@ -117,11 +161,43 @@ function saveState(state) {
       streak: state.streak,
       totalVisits: state.totalVisits,
       lastDialogueId: state.lastDialogueId,
+      careDay: state.careDay || "",
+      careDone: Array.isArray(state.careDone) ? state.careDone : [],
+      calmDay: state.calmDay || "",
+      calmCount: state.calmCount || 0,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
   } catch {
     /* ignore quota / private mode */
   }
+}
+
+/** 跨日重置关心清单勾选 */
+function ensureCareDay(state, today = todayKey()) {
+  if (state.careDay !== today) {
+    state.careDay = today;
+    state.careDone = [];
+  }
+  return state;
+}
+
+/** 跨日重置心事安放次数 */
+function ensureCalmDay(state, today = todayKey()) {
+  if (state.calmDay !== today) {
+    state.calmDay = today;
+    state.calmCount = 0;
+  }
+  return state;
+}
+
+function getCalmCountToday() {
+  const state = ensureCalmDay(loadRawState());
+  return state.calmCount || 0;
+}
+
+function getCareDoneSet() {
+  const state = ensureCareDay(loadRawState());
+  return new Set(state.careDone || []);
 }
 
 /** 进入页面时结算回访；同日不重复计 streak / totalVisits */
@@ -185,20 +261,49 @@ const visit = touchVisit();
 rebuildLinePool();
 
 const period = timePeriod();
-const greeting = pickRandom(greetings[period] || greetings.night);
+const onBirthday = isBirthday();
+const greeting = onBirthday
+  ? pickRandom(birthdayGreetings)
+  : pickRandom(greetings[period] || greetings.night);
 
 let currentLine = pickRandom(linePool);
 let lastLineId = currentLine?.id;
 
 /** 随口互动：当前选中的互动与回复 */
-let currentInteractionId = interactions[0]?.id || "";
+let currentInteractionId = availableInteractions()[0]?.id || "";
 let currentInteractionReply = null;
 let lastInteractionReplyText = "";
 
+/** 关心清单最近一次回复 */
+let lastCareReply = null;
+
+/**
+ * 心事安放仪式状态
+ * step: pick | hold | ground | release | done
+ */
+let calmStep = "pick";
+let calmStateId = calmStates[0]?.id || "spin";
+let calmMarginNote = "";
+/** @type {{ text: string, mood?: string } | null} */
+let calmHoldReply = null;
+/** @type {{ text: string, mood?: string } | null} */
+let calmReleaseReply = null;
+/** @type {{ text: string } | null} */
+let calmDoneLine = null;
+let calmBreathPhaseIndex = 0;
+let calmBreathCycle = 0;
+let calmBreathRemainMs = 0;
+let calmBreathRunning = false;
+let calmBreathRaf = 0;
+let calmBreathLastTs = 0;
+let calmGroundSideLine = "";
+const CALM_BREATH_TARGET_CYCLES = 3;
+
+const openDialogues = () => availableDialogues();
 let activeDialogueId =
-  visit.lastDialogueId && dialogues.some((d) => d.id === visit.lastDialogueId)
+  visit.lastDialogueId && openDialogues().some((d) => d.id === visit.lastDialogueId)
     ? visit.lastDialogueId
-    : dialogues[0]?.id;
+    : openDialogues()[0]?.id;
 let dialogueNodeId = dialogues.find((d) => d.id === activeDialogueId)?.start || "n0";
 
 // timer
@@ -240,7 +345,8 @@ function timerProgress() {
 }
 
 function getDialogue() {
-  return dialogues.find((d) => d.id === activeDialogueId) || dialogues[0];
+  const list = openDialogues();
+  return list.find((d) => d.id === activeDialogueId) || list[0] || dialogues[0];
 }
 
 function getNode() {
@@ -264,25 +370,53 @@ function renderAffinityEntry() {
   </a>`;
 }
 
+function renderBirthdayBanner() {
+  const copy = birthdayBannerCopy();
+  // 仅生日当天或 30 天内显示，避免常年占版面
+  if (copy.kind === "countdown") return "";
+  const claimed = hasClaimedBirthdayGift();
+  const isToday = copy.kind === "today";
+  return `
+  <section class="birthday-banner glass${isToday ? " is-today" : ""}" id="birthday-banner" aria-label="生日">
+    <div class="birthday-banner-copy">
+      <p class="birthday-banner-kicker">${isToday ? "Birthday Night" : "Countdown"}</p>
+      <h2 class="birthday-banner-title">${esc(copy.title)}</h2>
+      <p class="birthday-banner-text">${esc(copy.text)}</p>
+    </div>
+    ${
+      isToday
+        ? `<button type="button" class="btn btn-primary" id="birthday-gift-btn" ${claimed ? "disabled" : ""}>
+            ${claimed ? "今年的心意已收下" : "收下生日心意"}
+          </button>`
+        : ""
+    }
+  </section>`;
+}
+
 // ---------- shell render ----------
 
 function renderPresence() {
   const stage = getAffinityStage(getAffinityValue());
+  const frameId = resolveFrameId();
+  const periodLabel = onBirthday ? "生日" : periodLabels[period] || "夜晚";
   return `
   <section class="section companion-hero" id="presence">
+    ${renderBirthdayBanner()}
     <div class="companion-hero-grid">
       <div class="glass companion-presence">
         <p class="eyebrow">
           <span class="dot blue"></span>
-          <span>Companion · ${esc(periodLabels[period] || "夜晚")}</span>
+          <span>Companion · ${esc(periodLabel)}</span>
           <span class="dot amber"></span>
         </p>
-        <h1 class="companion-title">今晚，一起看星星</h1>
+        <h1 class="companion-title">${onBirthday ? "生日快乐，沙夜" : "今晚，一起看星星"}</h1>
         <p class="companion-greeting">「${esc(greeting?.text || "……你来了。")}」</p>
         <p class="companion-visit">${esc(visitSubtitle())}</p>
         ${renderAffinityEntry()}
-        <p class="companion-hint">不用赶路。问候、随口互动、星笺、计时与小对话——慢慢挑一样就好。互动也会悄悄加深<a href="./affinity.html">好感</a>。</p>
+        <p class="companion-hint">不用赶路。心事安放、关心清单、随口互动、星笺、计时与小对话——慢慢挑一样就好。互动也会悄悄加深<a href="./affinity.html">好感</a>。</p>
         <div class="companion-jump">
+          <a class="btn btn-ghost" href="#calm">心事安放</a>
+          <a class="btn btn-ghost" href="#care">每日关心</a>
           <a class="btn btn-ghost" href="#interact">随口互动</a>
           <a class="btn btn-ghost" href="#starline">今日星笺</a>
           <a class="btn btn-ghost" href="#stargaze">一起看星星</a>
@@ -290,7 +424,7 @@ function renderPresence() {
           <a class="btn btn-primary" href="./affinity.html">好感页</a>
         </div>
       </div>
-      <div class="companion-portrait glass">
+      <div class="companion-portrait glass portrait-frame portrait-frame--${esc(frameId)}">
         <img
           src="${imgSrc(saya.heroImage, saya.name)}"
           alt="${esc(saya.name)}"
@@ -311,24 +445,275 @@ function renderPresence() {
   </section>`;
 }
 
+function getCalmState() {
+  return calmStates.find((s) => s.id === calmStateId) || calmStates[0];
+}
+
+function getBreathPhase() {
+  return breathPhases[calmBreathPhaseIndex] || breathPhases[0];
+}
+
+function renderCalmBreathVisual() {
+  const phase = getBreathPhase();
+  const phaseId = phase?.id || "in";
+  const remainSec = Math.max(0, Math.ceil(calmBreathRemainMs / 1000));
+  const totalSec = phase?.seconds || 4;
+  const progress = totalSec > 0 ? 1 - calmBreathRemainMs / (totalSec * 1000) : 0;
+  return `
+    <div class="calm-breath" data-phase="${esc(phaseId)}" aria-live="polite">
+      <div class="calm-breath-orbs" aria-hidden="true">
+        <span class="calm-orb calm-orb-blue"></span>
+        <span class="calm-orb calm-orb-amber"></span>
+      </div>
+      <div class="calm-breath-readout">
+        <strong class="calm-breath-phase">${esc(phase?.label || "呼吸")}</strong>
+        <span class="calm-breath-count">${remainSec}s</span>
+        <p class="calm-breath-cue">${esc(phase?.cue || "")}</p>
+      </div>
+      <div class="calm-breath-bar" aria-hidden="true">
+        <span class="calm-breath-bar-fill" style="width:${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%"></span>
+      </div>
+      <p class="calm-breath-meta">第 ${Math.min(calmBreathCycle + 1, CALM_BREATH_TARGET_CYCLES)} / ${CALM_BREATH_TARGET_CYCLES} 轮${
+        calmBreathCycle >= 1 ? " · 可以进入下一步" : " · 至少完整一轮"
+      }</p>
+    </div>`;
+}
+
+function renderCalm() {
+  const meta = calmStepMeta[calmStep] || calmStepMeta.pick;
+  const state = getCalmState();
+  const todayCount = getCalmCountToday();
+  const hold = calmHoldReply;
+  const release = calmReleaseReply;
+  const doneLine = calmDoneLine;
+
+  let body = "";
+
+  if (calmStep === "pick") {
+    body = `
+      <div class="calm-pick" role="group" aria-label="现在的感觉">
+        ${calmStates
+          .map(
+            (s) => `
+          <button
+            type="button"
+            class="calm-chip${s.id === calmStateId ? " is-active" : ""}"
+            data-calm-state="${esc(s.id)}"
+            title="${esc(s.hint || s.label)}"
+          >
+            <span class="calm-chip-icon">${esc(s.icon || "·")}</span>
+            <span class="calm-chip-label">${esc(s.label)}</span>
+            <span class="calm-chip-hint">${esc(s.hint || "")}</span>
+          </button>`,
+          )
+          .join("")}
+      </div>
+      <label class="calm-margin">
+        <span class="calm-margin-label">页边一行（可选）</span>
+        <textarea
+          id="calm-margin-input"
+          class="calm-margin-input"
+          rows="2"
+          maxlength="80"
+          placeholder="${esc(calmMarginPlaceholder)}"
+        >${esc(calmMarginNote)}</textarea>
+        <span class="calm-margin-hint">只存在本机浏览器，刷新前可改；不会上传到任何服务器。</span>
+      </label>
+      <div class="calm-actions">
+        <button type="button" class="btn btn-primary" data-calm-start>……说给你听</button>
+      </div>`;
+  } else if (calmStep === "hold") {
+    body = `
+      <p class="calm-you">你 · ${esc(state?.label || "……")}</p>
+      ${
+        calmMarginNote
+          ? `<p class="calm-margin-echo">页边：「${esc(calmMarginNote)}」</p>`
+          : ""
+      }
+      <article class="companion-bubble calm-reply is-pop" data-mood="${esc(hold?.mood || "soft")}">
+        <p class="companion-bubble-text">「${esc(hold?.text || "……我在听。")}」</p>
+        <span class="companion-bubble-badge">沙夜</span>
+      </article>
+      <div class="calm-actions">
+        <button type="button" class="btn btn-primary" data-calm-to-ground>好，我们落地</button>
+        <button type="button" class="btn btn-ghost" data-calm-reset>重选感觉</button>
+      </div>`;
+  } else if (calmStep === "ground") {
+    body = `
+      <p class="calm-ground-hint">${esc(state?.groundHint || calmGroundLines[0])}</p>
+      ${
+        calmGroundSideLine
+          ? `<p class="calm-ground-side">「${esc(calmGroundSideLine)}」</p>`
+          : ""
+      }
+      ${renderCalmBreathVisual()}
+      <div class="calm-actions">
+        ${
+          calmBreathRunning
+            ? `<button type="button" class="btn btn-ghost" data-calm-breath-pause>暂停呼吸</button>`
+            : `<button type="button" class="btn btn-primary" data-calm-breath-start>${
+                calmBreathCycle > 0 || calmBreathRemainMs > 0 ? "继续呼吸" : "开始双星呼吸"
+              }</button>`
+        }
+        <button
+          type="button"
+          class="btn btn-ghost"
+          data-calm-to-release
+          ${calmBreathCycle < 1 ? "disabled" : ""}
+          title="${calmBreathCycle < 1 ? "请先完成至少一轮呼吸" : "进入抬头一步"}"
+        >呼吸够了，抬头</button>
+      </div>`;
+  } else if (calmStep === "release") {
+    body = `
+      <div class="calm-release-stage${calmMarginNote ? " has-note" : ""}">
+        <div class="calm-sky" aria-hidden="true">
+          <span class="calm-sky-star s1"></span>
+          <span class="calm-sky-star s2"></span>
+          <span class="calm-sky-star s3"></span>
+          <span class="calm-sky-star s4"></span>
+          <span class="calm-sky-star s5"></span>
+        </div>
+        <p class="calm-release-note">
+          ${
+            calmMarginNote
+              ? `页边已记下：「${esc(calmMarginNote)}」`
+              : `页边写着：「${esc(state?.label || "此刻的心事")} · 已安放」`
+          }
+        </p>
+      </div>
+      <article class="companion-bubble calm-reply is-pop" data-mood="${esc(release?.mood || "soft")}">
+        <p class="companion-bubble-text">「${esc(release?.text || "……抬头。")}」</p>
+        <span class="companion-bubble-badge">沙夜</span>
+      </article>
+      <div class="calm-actions">
+        <button type="button" class="btn btn-primary" data-calm-finish>安放好了</button>
+      </div>`;
+  } else {
+    // done
+    body = `
+      <article class="companion-bubble calm-reply is-pop" data-mood="care">
+        <p class="companion-bubble-text">「${esc(doneLine?.text || calmCompleteLines[0])}」</p>
+        <span class="companion-bubble-badge">沙夜</span>
+      </article>
+      <p class="calm-done-summary">
+        今日已安放 <strong>${todayCount}</strong> 次
+        · 想继续安静待着，可以去
+        <a href="#stargaze">一起看星星</a>
+        或
+        <a href="#care">关心清单</a>
+      </p>
+      <div class="calm-actions">
+        <button type="button" class="btn btn-primary" data-calm-reset>再安放一次</button>
+        <a class="btn btn-ghost" href="#stargaze">去看星星</a>
+      </div>`;
+  }
+
+  return `
+  <section class="section" id="calm">
+    <div class="section-head">
+      <p class="eyebrow">Calm</p>
+      <h2>心事安放</h2>
+      <p class="section-desc">焦虑或内耗时：先被接住，再跟着双星呼吸，把一行字写进页边、抬头看星。气质陪伴向，非医疗建议。完成仪式 +2 好感（日上限 4）。</p>
+    </div>
+    <div class="glass companion-calm" data-step="${esc(calmStep)}">
+      <div class="calm-step-head">
+        <p class="calm-step-eyebrow">${esc(meta.eyebrow)}</p>
+        <h3 class="calm-step-title">${esc(meta.title)}</h3>
+        <p class="calm-step-desc">${esc(meta.desc)}</p>
+      </div>
+      <div class="calm-progress" aria-hidden="true">
+        ${["pick", "hold", "ground", "release", "done"]
+          .map((s, i) => {
+            const order = ["pick", "hold", "ground", "release", "done"];
+            const cur = order.indexOf(calmStep);
+            const cls = i < cur ? "is-done" : i === cur ? "is-current" : "";
+            return `<span class="calm-dot ${cls}"></span>`;
+          })
+          .join("")}
+      </div>
+      ${body}
+    </div>
+  </section>`;
+}
+
+function renderCare() {
+  const done = getCareDoneSet();
+  const doneCount = careTasks.filter((t) => done.has(t.id)).length;
+  const reply = lastCareReply;
+  return `
+  <section class="section" id="care">
+    <div class="section-head">
+      <p class="eyebrow">Care</p>
+      <h2>通い妻关心清单</h2>
+      <p class="section-desc">今天有没有好好照顾自己？勾选后她会回你一句。每日每项 +1 好感（上限 4）。</p>
+    </div>
+    <div class="glass companion-care">
+      <div class="care-progress" aria-live="polite">
+        今日已确认 <strong>${doneCount}</strong> / ${careTasks.length}
+      </div>
+      <ul class="care-list" role="list">
+        ${careTasks
+          .map((task) => {
+            const checked = done.has(task.id);
+            return `
+          <li>
+            <button
+              type="button"
+              class="care-item${checked ? " is-done" : ""}"
+              data-care="${esc(task.id)}"
+              aria-pressed="${checked}"
+              ${checked ? "disabled" : ""}
+            >
+              <span class="care-check" aria-hidden="true">${checked ? "✓" : ""}</span>
+              <span class="care-body">
+                <span class="care-label">${esc(task.label)}</span>
+                <span class="care-icon">${esc(task.icon || "")}</span>
+              </span>
+            </button>
+          </li>`;
+          })
+          .join("")}
+      </ul>
+      <article
+        class="companion-bubble care-reply${reply ? " is-pop" : ""}"
+        id="care-bubble"
+        data-mood="${esc(reply?.mood || "care")}"
+      >
+        <p class="companion-bubble-text" id="care-text">
+          ${
+            reply
+              ? `「${esc(reply.text)}」`
+              : doneCount === careTasks.length
+                ? "「……今天的你，我记下了。好好的，比什么都重要。」"
+                : "「不用一次做完。想到哪一项，就勾上哪一项。」"
+          }
+        </p>
+        <span class="companion-bubble-badge">${reply || doneCount ? "沙夜" : "关心"}</span>
+      </article>
+    </div>
+  </section>`;
+}
+
 function renderInteract() {
   const reply = currentInteractionReply;
-  const active = interactions.find((i) => i.id === currentInteractionId) || interactions[0];
+  const pool = availableInteractions();
+  const locked = interactions.filter((i) => (i.minAffinity ?? 0) > getAffinityValue());
+  const active = pool.find((i) => i.id === currentInteractionId) || pool[0];
   return `
   <section class="section" id="interact">
     <div class="section-head">
       <p class="eyebrow">Interact</p>
       <h2>随口互动</h2>
-      <p class="section-desc">点一句你想说的，沙夜会按她的性子接住——气质整理向，非剧本原句。</p>
+      <p class="section-desc">点一句你想说的，沙夜会按她的性子接住——气质整理向，非剧本原句。部分句子随好感阶段解锁。</p>
     </div>
     <div class="glass companion-interact">
       <div class="interact-actions" role="group" aria-label="对沙夜说">
-        ${interactions
+        ${pool
           .map(
             (item) => `
           <button
             type="button"
-            class="interact-chip${item.id === currentInteractionId && reply ? " is-active" : ""}"
+            class="interact-chip${item.id === currentInteractionId && reply ? " is-active" : ""}${item.minAffinity ? " is-unlock" : ""}"
             data-interact="${esc(item.id)}"
             title="${esc(item.hint || item.label)}"
           >
@@ -338,6 +723,11 @@ function renderInteract() {
           )
           .join("")}
       </div>
+      ${
+        locked.length
+          ? `<p class="interact-locked-hint">还有 ${locked.length} 句随好感解锁（下一档约 ${locked[0].minAffinity}+）· <a href="./affinity.html#milestones">查看里程碑</a></p>`
+          : ""
+      }
       <article
         class="companion-bubble interact-reply${reply ? " is-pop" : ""}"
         id="interact-bubble"
@@ -453,33 +843,40 @@ function renderTimer() {
 }
 
 function renderDialogue() {
+  const list = openDialogues();
   const d = getDialogue();
   const node = getNode();
   const choices = node?.choices || [];
   const isEnd = !choices.length;
+  const lockedDialogues = dialogues.filter((x) => (x.minAffinity ?? 0) > getAffinityValue());
 
   return `
   <section class="section" id="dialogue">
     <div class="section-head">
       <p class="eyebrow">Dialogue</p>
       <h2>小对话</h2>
-      <p class="section-desc">多主题分支对话（观星、便当、吃醋、雨夜……）。气质整理向，非游戏剧本原句。</p>
+      <p class="section-desc">多主题分支对话（观星、便当、吃醋、雨夜……）。气质整理向，非游戏剧本原句。高好感会多出隐藏主题。</p>
     </div>
     <div class="glass companion-dialogue">
       <div class="dialogue-tabs" role="tablist" aria-label="对话主题">
-        ${dialogues
+        ${list
           .map(
             (item) => `
           <button
             type="button"
             role="tab"
-            class="filter-btn${item.id === activeDialogueId ? " is-active" : ""}"
+            class="filter-btn${item.id === activeDialogueId ? " is-active" : ""}${item.minAffinity ? " is-unlock" : ""}"
             data-dialogue="${esc(item.id)}"
             aria-selected="${item.id === activeDialogueId}"
           >${esc(item.title)}</button>`,
           )
           .join("")}
       </div>
+      ${
+        lockedDialogues.length
+          ? `<p class="interact-locked-hint">隐藏对话 ${lockedDialogues.map((x) => `「${esc(x.title)}」需 ${x.minAffinity}+`).join(" · ")}</p>`
+          : ""
+      }
       <div class="dialogue-stage" id="dialogue-stage">
         <p class="dialogue-speaker">${esc(node?.speaker || saya.name)}</p>
         <p class="dialogue-text">「${esc(node?.text || "……")}」</p>
@@ -508,10 +905,13 @@ function renderDialogue() {
 }
 
 function renderPage() {
+  applySiteAppearance();
   app.innerHTML = `
     ${renderSiteHeader({ active: "companion", base: "." })}
     <main class="page companion-page">
       ${renderPresence()}
+      ${renderCalm()}
+      ${renderCare()}
       ${renderInteract()}
       ${renderStarline()}
       ${renderTimer()}
@@ -535,6 +935,258 @@ function refreshAffinityEntry() {
   }
   const chip = document.querySelector(".affinity-chip");
   if (chip) chip.textContent = getAffinityStage(getAffinityValue()).short;
+  const portrait = document.querySelector(".companion-portrait");
+  if (portrait) {
+    portrait.className = `companion-portrait glass portrait-frame portrait-frame--${resolveFrameId()}`;
+  }
+}
+
+function refreshCareSection() {
+  const section = document.querySelector("#care");
+  if (!section) return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = renderCare();
+  const next = wrap.firstElementChild;
+  section.replaceWith(next);
+  next.classList.add("reveal", "is-visible");
+  const bubble = next.querySelector("#care-bubble");
+  if (bubble && lastCareReply) {
+    bubble.classList.remove("is-pop");
+    void bubble.offsetWidth;
+    bubble.classList.add("is-pop");
+  }
+}
+
+// ---------- 心事安放 ----------
+
+function stopCalmBreathLoop() {
+  if (calmBreathRaf) {
+    cancelAnimationFrame(calmBreathRaf);
+    calmBreathRaf = 0;
+  }
+  calmBreathLastTs = 0;
+}
+
+function syncCalmBreathDom() {
+  const root = document.querySelector(".calm-breath");
+  if (!root || calmStep !== "ground") return;
+  const phase = getBreathPhase();
+  const phaseId = phase?.id || "in";
+  const remainSec = Math.max(0, Math.ceil(calmBreathRemainMs / 1000));
+  const totalSec = phase?.seconds || 4;
+  const progress = totalSec > 0 ? 1 - calmBreathRemainMs / (totalSec * 1000) : 0;
+
+  root.dataset.phase = phaseId;
+  const phaseEl = root.querySelector(".calm-breath-phase");
+  const countEl = root.querySelector(".calm-breath-count");
+  const cueEl = root.querySelector(".calm-breath-cue");
+  const fill = root.querySelector(".calm-breath-bar-fill");
+  const meta = root.querySelector(".calm-breath-meta");
+  if (phaseEl) phaseEl.textContent = phase?.label || "呼吸";
+  if (countEl) countEl.textContent = `${remainSec}s`;
+  if (cueEl) cueEl.textContent = phase?.cue || "";
+  if (fill) fill.style.width = `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%`;
+  if (meta) {
+    meta.textContent = `第 ${Math.min(calmBreathCycle + 1, CALM_BREATH_TARGET_CYCLES)} / ${CALM_BREATH_TARGET_CYCLES} 轮${
+      calmBreathCycle >= 1 ? " · 可以进入下一步" : " · 至少完整一轮"
+    }`;
+  }
+
+  const releaseBtn = document.querySelector("[data-calm-to-release]");
+  if (releaseBtn) {
+    releaseBtn.disabled = calmBreathCycle < 1;
+    releaseBtn.title = calmBreathCycle < 1 ? "请先完成至少一轮呼吸" : "进入抬头一步";
+  }
+}
+
+function advanceCalmBreathPhase() {
+  calmBreathPhaseIndex += 1;
+  if (calmBreathPhaseIndex >= breathPhases.length) {
+    calmBreathPhaseIndex = 0;
+    calmBreathCycle += 1;
+    if (calmBreathCycle === 1 || calmBreathCycle === CALM_BREATH_TARGET_CYCLES) {
+      calmGroundSideLine =
+        pickRandom(calmGroundLines.map((t, i) => ({ id: String(i), text: t })))?.text ||
+        calmGroundLines[0];
+      const side = document.querySelector(".calm-ground-side");
+      if (side) {
+        side.textContent = `「${calmGroundSideLine}」`;
+      } else {
+        refreshCalmSection({ preserveBreath: true });
+        return;
+      }
+    }
+  }
+  const phase = getBreathPhase();
+  calmBreathRemainMs = (phase?.seconds || 4) * 1000;
+  syncCalmBreathDom();
+}
+
+function tickCalmBreath(ts) {
+  if (!calmBreathRunning || calmStep !== "ground") return;
+  if (!calmBreathLastTs) calmBreathLastTs = ts;
+  const delta = ts - calmBreathLastTs;
+  calmBreathLastTs = ts;
+  calmBreathRemainMs -= delta;
+  if (calmBreathRemainMs <= 0) {
+    advanceCalmBreathPhase();
+  } else {
+    syncCalmBreathDom();
+  }
+  if (calmBreathRunning) {
+    calmBreathRaf = requestAnimationFrame(tickCalmBreath);
+  }
+}
+
+function startCalmBreath() {
+  if (calmStep !== "ground") return;
+  if (calmBreathRemainMs <= 0) {
+    const phase = getBreathPhase();
+    calmBreathRemainMs = (phase?.seconds || 4) * 1000;
+  }
+  calmBreathRunning = true;
+  stopCalmBreathLoop();
+  calmBreathRaf = requestAnimationFrame(tickCalmBreath);
+  refreshCalmSection({ preserveBreath: true });
+}
+
+function pauseCalmBreath() {
+  calmBreathRunning = false;
+  stopCalmBreathLoop();
+  refreshCalmSection({ preserveBreath: true });
+}
+
+function readMarginFromDom() {
+  const input = document.querySelector("#calm-margin-input");
+  if (input && "value" in input) {
+    calmMarginNote = String(input.value || "").trim().slice(0, 80);
+  }
+}
+
+function startCalmRitual() {
+  readMarginFromDom();
+  const state = getCalmState();
+  if (!state) return;
+  stopCalmBreathLoop();
+  calmBreathRunning = false;
+  calmHoldReply = pickRandom(
+    (state.holdReplies || []).map((r, i) => ({
+      id: `${state.id}-h-${i}`,
+      text: r.text,
+      mood: r.mood || "soft",
+    })),
+  );
+  calmStep = "hold";
+  refreshCalmSection();
+}
+
+function goCalmGround() {
+  stopCalmBreathLoop();
+  calmBreathRunning = false;
+  calmBreathPhaseIndex = 0;
+  calmBreathCycle = 0;
+  calmBreathRemainMs = (breathPhases[0]?.seconds || 4) * 1000;
+  calmGroundSideLine = "";
+  calmStep = "ground";
+  refreshCalmSection();
+}
+
+function goCalmRelease() {
+  if (calmBreathCycle < 1) return;
+  stopCalmBreathLoop();
+  calmBreathRunning = false;
+  const state = getCalmState();
+  calmReleaseReply = pickRandom(
+    (state?.releaseReplies || []).map((r, i) => ({
+      id: `${state.id}-r-${i}`,
+      text: r.text,
+      mood: r.mood || "soft",
+    })),
+  );
+  calmStep = "release";
+  refreshCalmSection();
+}
+
+function finishCalmRitual() {
+  stopCalmBreathLoop();
+  calmBreathRunning = false;
+  const state = ensureCalmDay(loadRawState());
+  state.calmCount = (state.calmCount || 0) + 1;
+  saveState(state);
+  calmDoneLine = pickRandom(
+    calmCompleteLines.map((t, i) => ({ id: String(i), text: t })),
+  );
+  calmStep = "done";
+  gainAffinity("calmSession");
+  refreshCalmSection();
+}
+
+function resetCalmRitual() {
+  stopCalmBreathLoop();
+  calmBreathRunning = false;
+  calmStep = "pick";
+  calmHoldReply = null;
+  calmReleaseReply = null;
+  calmDoneLine = null;
+  calmBreathPhaseIndex = 0;
+  calmBreathCycle = 0;
+  calmBreathRemainMs = 0;
+  calmGroundSideLine = "";
+  // keep calmStateId & calmMarginNote so user can tweak
+  refreshCalmSection();
+}
+
+/**
+ * @param {{ preserveBreath?: boolean }} [opts]
+ */
+function refreshCalmSection(opts = {}) {
+  const section = document.querySelector("#calm");
+  if (!section) return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = renderCalm();
+  const next = wrap.firstElementChild;
+  section.replaceWith(next);
+  next.classList.add("reveal", "is-visible");
+  const panel = next.querySelector(".companion-calm");
+  if (panel) {
+    panel.classList.add("reveal", "is-visible");
+  }
+  if (opts.preserveBreath && calmBreathRunning) {
+    stopCalmBreathLoop();
+    calmBreathRaf = requestAnimationFrame(tickCalmBreath);
+  }
+  const bubbles = next.querySelectorAll(".calm-reply");
+  bubbles.forEach((bubble) => {
+    bubble.classList.remove("is-pop");
+    void bubble.offsetWidth;
+    bubble.classList.add("is-pop");
+  });
+}
+
+function toggleCareTask(taskId) {
+  const task = careTasks.find((t) => t.id === taskId);
+  if (!task) return;
+  const state = ensureCareDay(loadRawState());
+  const done = new Set(state.careDone || []);
+  if (done.has(taskId)) return;
+  done.add(taskId);
+  state.careDone = [...done];
+  saveState(state);
+  const reply = pickRandom(
+    task.replies.map((r, i) => ({ id: `${task.id}-${i}`, text: r.text, mood: r.mood || "care" })),
+  );
+  lastCareReply = reply;
+  gainAffinity("careCheck");
+  refreshCareSection();
+}
+
+function tryBirthdayGift() {
+  const result = claimBirthdayGift();
+  const btn = document.querySelector("#birthday-gift-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = result.applied > 0 ? "心意已收下" : "今年的心意已收下";
+  }
 }
 
 // ---------- timer logic ----------
@@ -695,9 +1347,10 @@ function restartDialogue() {
 }
 
 function nextDialogueScript() {
-  const idx = dialogues.findIndex((d) => d.id === activeDialogueId);
-  const next = dialogues[(idx + 1) % dialogues.length];
-  selectDialogue(next.id, true);
+  const list = openDialogues();
+  const idx = list.findIndex((d) => d.id === activeDialogueId);
+  const next = list[(idx + 1) % list.length];
+  if (next) selectDialogue(next.id, true);
 }
 
 function refreshDialogueSection() {
@@ -735,6 +1388,8 @@ function pickInteractionReply(interactionId, avoidText = "") {
 }
 
 function runInteraction(interactionId, again = false) {
+  const allowed = availableInteractions().some((i) => i.id === interactionId);
+  if (!allowed) return;
   currentInteractionId = interactionId;
   const avoid = again ? lastInteractionReplyText : "";
   const reply = pickInteractionReply(interactionId, avoid);
@@ -767,6 +1422,60 @@ function bindEvents() {
   app.addEventListener("click", (e) => {
     if (e.target.closest("#line-refresh")) {
       refreshStarline();
+      return;
+    }
+
+    const calmStateBtn = e.target.closest("[data-calm-state]");
+    if (calmStateBtn) {
+      calmStateId = calmStateBtn.dataset.calmState;
+      readMarginFromDom();
+      refreshCalmSection();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-start]")) {
+      startCalmRitual();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-to-ground]")) {
+      goCalmGround();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-breath-start]")) {
+      startCalmBreath();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-breath-pause]")) {
+      pauseCalmBreath();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-to-release]")) {
+      goCalmRelease();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-finish]")) {
+      finishCalmRitual();
+      return;
+    }
+
+    if (e.target.closest("[data-calm-reset]")) {
+      resetCalmRitual();
+      return;
+    }
+
+    const careBtn = e.target.closest("[data-care]");
+    if (careBtn && !careBtn.disabled) {
+      toggleCareTask(careBtn.dataset.care);
+      return;
+    }
+
+    if (e.target.closest("#birthday-gift-btn")) {
+      tryBirthdayGift();
       return;
     }
 
@@ -830,11 +1539,29 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden && timerRunning && !timerPaused) {
     pauseTimer();
   }
+  if (document.hidden && calmBreathRunning) {
+    pauseCalmBreath();
+  }
 });
 
 onAffinityChange((evt) => {
   refreshAffinityEntry();
-  if (evt.leveled) rebuildLinePool();
+  applySiteAppearance();
+  if (evt.leveled) {
+    rebuildLinePool();
+    // 升阶可能解锁新互动 / 对话
+    const pool = availableInteractions();
+    if (pool.length && !pool.some((i) => i.id === currentInteractionId)) {
+      currentInteractionId = pool[0].id;
+    }
+    refreshInteractSection();
+    const dlist = openDialogues();
+    if (dlist.length && !dlist.some((d) => d.id === activeDialogueId)) {
+      selectDialogue(dlist[0].id, true);
+    } else {
+      refreshDialogueSection();
+    }
+  }
 });
 
 // ---------- boot ----------

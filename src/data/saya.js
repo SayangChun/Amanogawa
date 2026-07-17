@@ -21,6 +21,8 @@ export const saya = {
   quote: "……被当成局外人，可是不行的哦。",
   favoriteStar: "冬季的天鹅座 β（大犬座 145）",
   eyeMetaphor: "天鹅座 β · 辇道增七",
+  /** 生日（月/日，用于特别夜与倒计时） */
+  birthday: { month: 1, day: 16 },
   stats: [
     { label: "生日", value: "1 月 16 日" },
     { label: "血型", value: "A 型" },

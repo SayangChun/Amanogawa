@@ -12,7 +12,11 @@ import {
   affinityRules,
   affinityLevelUpLines,
   affinityUnlockLines,
+  affinityThemes,
+  affinityFrames,
+  stageRewards,
 } from "./data/affinity.js";
+import { birthdayYearKey, isBirthday } from "./birthday.js";
 
 export {
   AFFINITY_MAX,
@@ -21,6 +25,9 @@ export {
   affinityRules,
   affinityLevelUpLines,
   affinityUnlockLines,
+  affinityThemes,
+  affinityFrames,
+  stageRewards,
 } from "./data/affinity.js";
 
 // ---------- calendar ----------
@@ -77,6 +84,9 @@ export function emptyDailyAffinity() {
     timer: 0,
     dialogueChoice: 0,
     dialogueComplete: 0,
+    careCheck: 0,
+    calmSession: 0,
+    birthdayGift: 0,
   };
 }
 
@@ -94,6 +104,11 @@ function defaultState() {
     completedDialogues: [],
     firstTouch: "",
     migratedFromCompanion: false,
+    /** 已领取生日礼的年份，如 ["2026"] */
+    birthdayGiftYears: [],
+    /** 主题 / 边框偏好：auto 取当前最高解锁 */
+    preferredTheme: "auto",
+    preferredFrame: "auto",
   };
 }
 
@@ -145,6 +160,11 @@ export function loadAffinityState() {
       completedDialogues: Array.isArray(parsed.completedDialogues)
         ? parsed.completedDialogues
         : [],
+      birthdayGiftYears: Array.isArray(parsed.birthdayGiftYears)
+        ? parsed.birthdayGiftYears.map(String)
+        : [],
+      preferredTheme: parsed.preferredTheme || "auto",
+      preferredFrame: parsed.preferredFrame || "auto",
       affinity: clampAffinity(parsed.affinity ?? 0),
     };
   } catch {
@@ -260,6 +280,24 @@ export function gainAffinity(source, meta = {}) {
         state.completedDialogues = [...(state.completedDialogues || []), id];
       }
     }
+  } else if (source === "birthdayGift") {
+    if (!isBirthday()) {
+      return { applied: 0, leveled: false, after: before, event: null };
+    }
+    const year = birthdayYearKey();
+    const years = state.birthdayGiftYears || [];
+    if (years.includes(year)) {
+      return { applied: 0, leveled: false, after: before, event: null };
+    }
+    const want = rule.points || 8;
+    applied = Math.max(0, Math.min(want, AFFINITY_MAX - before));
+    if (applied > 0) {
+      state.affinity = clampAffinity(before + applied);
+      state.birthdayGiftYears = [...years, year];
+      // 同步记入当日 bucket，便于余量展示
+      ensureAffinityDay(state);
+      state.affinityDaily.birthdayGift = applied;
+    }
   } else {
     applied = applyBucketGain(state, rule.bucket, rule.points, rule.dailyCap);
   }
@@ -311,6 +349,79 @@ export function getDailyRemaining() {
 
 export function getUnlockedLines(affinity = getAffinityValue()) {
   return affinityUnlockLines.filter((l) => affinity >= l.min);
+}
+
+/** 当前好感下已解锁的里程碑条目（扁平） */
+export function getUnlockedRewards(affinity = getAffinityValue()) {
+  return stageRewards.flatMap((stage) =>
+    affinity >= stage.min
+      ? stage.unlocks.map((u) => ({ ...u, stageId: stage.stageId, min: stage.min }))
+      : [],
+  );
+}
+
+export function getUnlockedThemes(affinity = getAffinityValue()) {
+  return affinityThemes.filter((t) => affinity >= t.min);
+}
+
+export function getUnlockedFrames(affinity = getAffinityValue()) {
+  return affinityFrames.filter((f) => affinity >= f.min);
+}
+
+/** 解析 auto / 具体 id，回落到已解锁最高或 default */
+export function resolveThemeId(affinity = getAffinityValue(), preferred) {
+  const state = preferred != null ? { preferredTheme: preferred } : loadAffinityState();
+  const unlocked = getUnlockedThemes(affinity);
+  const pref = state.preferredTheme || "auto";
+  if (pref !== "auto" && unlocked.some((t) => t.id === pref)) return pref;
+  return unlocked[unlocked.length - 1]?.id || "default";
+}
+
+export function resolveFrameId(affinity = getAffinityValue(), preferred) {
+  const state = preferred != null ? { preferredFrame: preferred } : loadAffinityState();
+  const unlocked = getUnlockedFrames(affinity);
+  const pref = state.preferredFrame || "auto";
+  if (pref !== "auto" && unlocked.some((f) => f.id === pref)) return pref;
+  return unlocked[unlocked.length - 1]?.id || "none";
+}
+
+export function setPreferredTheme(themeId) {
+  const state = loadAffinityState();
+  state.preferredTheme = themeId || "auto";
+  saveAffinityState(state);
+  applySiteAppearance();
+}
+
+export function setPreferredFrame(frameId) {
+  const state = loadAffinityState();
+  state.preferredFrame = frameId || "auto";
+  saveAffinityState(state);
+  applySiteAppearance();
+}
+
+/** 将主题写到 documentElement；边框 class 由页面肖像节点自行取 resolveFrameId */
+export function applySiteAppearance() {
+  if (typeof document === "undefined") return;
+  const affinity = getAffinityValue();
+  const theme = resolveThemeId(affinity);
+  const root = document.documentElement;
+  if (theme === "default") {
+    root.removeAttribute("data-theme");
+  } else {
+    root.setAttribute("data-theme", theme);
+  }
+  root.dataset.affinityStage = getAffinityStage(affinity).id;
+}
+
+/** 今年生日礼是否已领 */
+export function hasClaimedBirthdayGift(d = new Date()) {
+  const state = loadAffinityState();
+  return (state.birthdayGiftYears || []).includes(birthdayYearKey(d));
+}
+
+/** 尝试领取生日礼；非生日或已领则 applied=0 */
+export function claimBirthdayGift() {
+  return gainAffinity("birthdayGift");
 }
 
 // ---------- UI snippets ----------

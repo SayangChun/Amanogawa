@@ -25,8 +25,21 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="preload" href="./assets/bgm/night-sky.wav" as="audio" type="audio/wav" />
+    <!-- 原生 autoplay：浏览器允许时刷新即可无点击出声 -->
+    <script type="module" src="./src/bgm.js"></script>
   </head>
   <body>
+    <audio
+      id="bgm-audio"
+      autoplay
+      loop
+      preload="auto"
+      playsinline
+      src="./assets/bgm/night-sky.wav"
+      aria-hidden="true"
+      hidden
+    ></audio>
     <canvas id="starfield" aria-hidden="true"></canvas>
     <div class="aurora" aria-hidden="true"></div>
     <div class="noise" aria-hidden="true"></div>

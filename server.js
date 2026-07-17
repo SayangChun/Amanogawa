@@ -19,6 +19,9 @@ const mimeTypes = new Map([
   [".webp", "image/webp"],
   [".gif", "image/gif"],
   [".ico", "image/x-icon"],
+  [".wav", "audio/wav"],
+  [".mp3", "audio/mpeg"],
+  [".ogg", "audio/ogg"],
   [".md", "text/markdown; charset=utf-8"],
   [".webmanifest", "application/manifest+json; charset=utf-8"],
 ]);
