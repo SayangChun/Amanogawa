@@ -66,10 +66,6 @@ export function tryApplySiteAppearance() {
 
 export function initStarfield() {
   tryApplySiteAppearance();
-  // 背景氛围音：与星空同启，失败不影响主流程
-  import("./bgm.js")
-    .then((m) => m.initBgm?.())
-    .catch(() => {});
   const canvas = document.getElementById("starfield");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
