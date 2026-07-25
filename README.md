@@ -22,6 +22,7 @@
   - 回访连续天数（本机 localStorage）
   - 多主题分支小对话（气质整理向；含「心事太吵」；高好感解锁隐藏主题）
   - 行为会联动独立好感系统（入口卡片跳转好感页）
+  - **浮窗陪伴**（极简）：系统级小窗；多图随机面部 + 陪伴话语（可换句 / 换脸）；完整互动请回陪伴页
 - **好感页** `affinity.html`（独立）
   - 0–100 好感度与星象阶段星图
   - 心意一拍 / 送星等本页互动
@@ -42,6 +43,7 @@ npm start
 - 星笺：http://localhost:3000/quotes.html
 - 陪伴：http://localhost:3000/companion.html
 - 好感：http://localhost:3000/affinity.html
+- 浮窗（调试 / 回退小窗）：http://localhost:3000/float.html
 
 ## 添加你的 AI 图
 
@@ -55,7 +57,7 @@ npm start
 ## 目录
 
 ```
-index.html / gallery.html / quotes.html / companion.html / affinity.html
+index.html / gallery.html / quotes.html / companion.html / affinity.html / float.html
 server.js                 本地静态服务 + AI 图扫描 API
 site.webmanifest          PWA 清单
 vercel.json               部署路由
@@ -70,6 +72,11 @@ src/
   gallery-page.js         图集页
   quotes-page.js          星笺页
   companion-page.js       陪伴页
+  float-page.js           浮窗页入口
+  float-companion.js      浮窗 UI（随机面部 + 话语）
+  float-launcher.js       Document PiP + 小窗启动器
+  companion-store.js      陪伴 localStorage（陪伴页与浮窗共用）
+  data/float-avatars.js   浮窗头像池与面部裁切参数
   affinity-page.js        好感页
   affinity-core.js        好感存储 / 加分 / 主题 / toast（跨页共用）
   birthday.js             生日倒计时与特别夜
@@ -85,6 +92,7 @@ src/
     calm.js               心事安放状态 / 呼吸 / 收尾文案
     affinity.js           好感阶段 / 规则 / 里程碑 / 主题
 ```
+
 
 ## 来源说明
 

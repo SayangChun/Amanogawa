@@ -465,24 +465,29 @@ export function renderAffinityMeterHtml({
   </div>`;
 }
 
-let toastTimer = 0;
-
-export function ensureAffinityToastHost() {
-  let el = document.querySelector("#affinity-toast");
+/** @param {Document} [doc] */
+export function ensureAffinityToastHost(doc = typeof document !== "undefined" ? document : null) {
+  if (!doc?.body) return null;
+  let el = doc.querySelector("#affinity-toast");
   if (el) return el;
-  el = document.createElement("div");
+  el = doc.createElement("div");
   el.id = "affinity-toast";
   el.className = "affinity-toast";
   el.hidden = true;
   el.setAttribute("aria-live", "polite");
-  document.body.appendChild(el);
+  doc.body.appendChild(el);
   return el;
 }
 
-/** @param {AffinityEvent} evt */
-export function showAffinityToast(evt) {
-  if (typeof document === "undefined") return;
-  const el = ensureAffinityToastHost();
+/** @type {Map<Document, number>} */
+const toastTimers = new WeakMap();
+
+/**
+ * @param {AffinityEvent} evt
+ * @param {Document} [doc]
+ */
+function paintAffinityToast(evt, doc) {
+  const el = ensureAffinityToastHost(doc);
   if (!el) return;
 
   if (evt.leveled && evt.stage) {
@@ -503,11 +508,35 @@ export function showAffinityToast(evt) {
   void el.offsetWidth;
   el.classList.add("is-show");
 
-  if (toastTimer) window.clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => {
+  const prev = toastTimers.get(doc);
+  if (prev) {
+    try {
+      (doc.defaultView || window).clearTimeout(prev);
+    } catch {
+      window.clearTimeout(prev);
+    }
+  }
+  const w = doc.defaultView || window;
+  const timer = w.setTimeout(() => {
     el.classList.remove("is-show");
-    window.setTimeout(() => {
+    w.setTimeout(() => {
       el.hidden = true;
     }, 320);
   }, evt.leveled ? 4200 : 2400);
+  toastTimers.set(doc, timer);
+}
+
+/** @param {AffinityEvent} evt */
+export function showAffinityToast(evt) {
+  if (typeof document === "undefined") return;
+  paintAffinityToast(evt, document);
+  // Document PiP 浮窗也显示好感反馈
+  try {
+    const pipDoc = window.documentPictureInPicture?.window?.document;
+    if (pipDoc && pipDoc !== document) {
+      paintAffinityToast(evt, pipDoc);
+    }
+  } catch {
+    /* ignore */
+  }
 }

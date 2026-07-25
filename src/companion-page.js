@@ -9,7 +9,6 @@ import {
   timerDoneLines,
   dialogues,
   interactions,
-  STORAGE_KEY,
 } from "./data/companion.js";
 import {
   calmStates,
@@ -32,6 +31,16 @@ import {
   hasClaimedBirthdayGift,
 } from "./affinity-core.js";
 import { isBirthday, birthdayBannerCopy } from "./birthday.js";
+import {
+  todayKey,
+  loadCompanionState,
+  saveCompanionState,
+  ensureCareDay,
+  ensureCalmDay,
+  getCareDoneSet,
+  getCalmCountToday,
+} from "./companion-store.js";
+import { openFloatCompanion, showFloatLaunchMessage } from "./float-launcher.js";
 import {
   esc,
   imgSrc,
@@ -60,13 +69,6 @@ const app = document.querySelector("#app");
  */
 
 // ---------- utils ----------
-
-function todayKey(d = new Date()) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
 
 function availableInteractions(affinity = getAffinityValue()) {
   return interactions.filter((i) => (i.minAffinity ?? 0) <= affinity);
@@ -118,86 +120,14 @@ const periodLabels = {
   late: "深夜",
 };
 
-// ---------- companion storage（不含好感） ----------
-
-function defaultState() {
-  const t = todayKey();
-  return {
-    firstVisit: t,
-    lastVisitDate: "",
-    streak: 0,
-    totalVisits: 0,
-    lastDialogueId: dialogues[0]?.id,
-    careDay: "",
-    careDone: [],
-    calmDay: "",
-    calmCount: 0,
-  };
-}
+// ---------- companion storage（共用 companion-store；不含好感） ----------
 
 function loadRawState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    const base = defaultState();
-    return {
-      ...base,
-      ...parsed,
-      careDone: Array.isArray(parsed.careDone) ? parsed.careDone.map(String) : [],
-      calmCount: Number.isFinite(Number(parsed.calmCount)) ? Number(parsed.calmCount) : 0,
-    };
-  } catch {
-    return defaultState();
-  }
+  return loadCompanionState();
 }
 
 function saveState(state) {
-  try {
-    // 只持久化陪伴字段，避免把旧好感字段继续写回
-    const slim = {
-      firstVisit: state.firstVisit,
-      lastVisitDate: state.lastVisitDate,
-      streak: state.streak,
-      totalVisits: state.totalVisits,
-      lastDialogueId: state.lastDialogueId,
-      careDay: state.careDay || "",
-      careDone: Array.isArray(state.careDone) ? state.careDone : [],
-      calmDay: state.calmDay || "",
-      calmCount: state.calmCount || 0,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
-  } catch {
-    /* ignore quota / private mode */
-  }
-}
-
-/** 跨日重置关心清单勾选 */
-function ensureCareDay(state, today = todayKey()) {
-  if (state.careDay !== today) {
-    state.careDay = today;
-    state.careDone = [];
-  }
-  return state;
-}
-
-/** 跨日重置心事安放次数 */
-function ensureCalmDay(state, today = todayKey()) {
-  if (state.calmDay !== today) {
-    state.calmDay = today;
-    state.calmCount = 0;
-  }
-  return state;
-}
-
-function getCalmCountToday() {
-  const state = ensureCalmDay(loadRawState());
-  return state.calmCount || 0;
-}
-
-function getCareDoneSet() {
-  const state = ensureCareDay(loadRawState());
-  return new Set(state.careDone || []);
+  saveCompanionState(state);
 }
 
 /** 进入页面时结算回访；同日不重复计 streak / totalVisits */
@@ -413,15 +343,16 @@ function renderPresence() {
         <p class="companion-greeting">「${esc(greeting?.text || "……你来了。")}」</p>
         <p class="companion-visit">${esc(visitSubtitle())}</p>
         ${renderAffinityEntry()}
-        <p class="companion-hint">不用赶路。心事安放、关心清单、随口互动、星笺、计时与小对话——慢慢挑一样就好。互动也会悄悄加深<a href="./affinity.html">好感</a>。</p>
+        <p class="companion-hint">不用赶路。心事安放、关心清单、随口互动、星笺、计时与小对话——慢慢挑一样就好。互动也会悄悄加深<a href="./affinity.html">好感</a>。也可打开<strong>浮窗陪伴</strong>，切到其他软件时仍能看见她。</p>
         <div class="companion-jump">
+          <button type="button" class="btn btn-primary" id="open-float-companion" title="系统浮窗 / 小窗置顶">浮窗陪伴</button>
           <a class="btn btn-ghost" href="#calm">心事安放</a>
           <a class="btn btn-ghost" href="#care">每日关心</a>
           <a class="btn btn-ghost" href="#interact">随口互动</a>
           <a class="btn btn-ghost" href="#starline">今日星笺</a>
           <a class="btn btn-ghost" href="#stargaze">一起看星星</a>
           <a class="btn btn-ghost" href="#dialogue">小对话</a>
-          <a class="btn btn-primary" href="./affinity.html">好感页</a>
+          <a class="btn btn-ghost" href="./affinity.html">好感页</a>
         </div>
       </div>
       <div class="companion-portrait glass portrait-frame portrait-frame--${esc(frameId)}">
@@ -791,7 +722,7 @@ function renderTimer() {
     <div class="section-head">
       <p class="eyebrow">Stargaze</p>
       <h2>一起看星星</h2>
-      <p class="section-desc">选一段时长，安静地待着。切到后台会自动暂停。</p>
+      <p class="section-desc">选一段时长，安静地待着。离开本页会暂停；用「浮窗陪伴」时，浮窗内计时独立运行。</p>
     </div>
     <div class="glass companion-timer">
       <div class="timer-presets" role="group" aria-label="时长预设">
@@ -1418,8 +1349,26 @@ function refreshInteractSection() {
 
 // ---------- events（委托到 #app，避免局部重绘丢监听） ----------
 
+async function tryOpenFloatCompanion() {
+  const result = await openFloatCompanion({ preferPip: true });
+  if (!result.ok) {
+    showFloatLaunchMessage(result.error || "无法打开浮窗。");
+    return;
+  }
+  if (result.mode === "popup") {
+    showFloatLaunchMessage("已打开独立小窗。允许弹出窗口后可再次使用；Chrome / Edge 支持置顶 PiP。");
+  } else if (result.mode === "pip") {
+    showFloatLaunchMessage("浮窗已打开——可拖到屏幕边，继续做事时她也在。");
+  }
+}
+
 function bindEvents() {
   app.addEventListener("click", (e) => {
+    if (e.target.closest("#open-float-companion")) {
+      tryOpenFloatCompanion();
+      return;
+    }
+
     if (e.target.closest("#line-refresh")) {
       refreshStarline();
       return;
@@ -1536,6 +1485,7 @@ function bindEvents() {
 }
 
 document.addEventListener("visibilitychange", () => {
+  // 本页不可见时暂停本页计时 / 呼吸；系统浮窗内有独立计时，不受此处影响
   if (document.hidden && timerRunning && !timerPaused) {
     pauseTimer();
   }
