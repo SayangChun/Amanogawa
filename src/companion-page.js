@@ -102,18 +102,20 @@ function pickRandom(list, avoidId) {
   return item;
 }
 
-/** 时段：5–10 晨 · 10–16 午 · 16–20 傍晚 · 20–24 夜 · 0–5 深夜 */
+/** 时段：5–8 清晨 · 8–12 上午 · 12–16 午后 · 16–20 傍晚 · 20–24 夜 · 0–5 深夜 */
 function timePeriod(date = new Date()) {
   const h = date.getHours();
-  if (h >= 5 && h < 10) return "morning";
-  if (h >= 10 && h < 16) return "afternoon";
+  if (h >= 5 && h < 8) return "early";
+  if (h >= 8 && h < 12) return "morning";
+  if (h >= 12 && h < 16) return "afternoon";
   if (h >= 16 && h < 20) return "evening";
   if (h >= 20 && h < 24) return "night";
   return "late";
 }
 
 const periodLabels = {
-  morning: "清晨",
+  early: "清晨",
+  morning: "上午",
   afternoon: "午后",
   evening: "傍晚",
   night: "夜晚",
