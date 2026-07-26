@@ -47,6 +47,17 @@ export function clampAffinity(n) {
   return Math.max(0, Math.min(AFFINITY_MAX, Math.round(v)));
 }
 
+/** 阶段提升台词：支持 string 或 string[] */
+function pickLevelUpLine(stageId) {
+  const raw = affinityLevelUpLines[stageId];
+  if (raw == null) return "";
+  if (Array.isArray(raw)) {
+    if (!raw.length) return "";
+    return raw[Math.floor(Math.random() * raw.length)] || "";
+  }
+  return String(raw);
+}
+
 export function getAffinityStage(value) {
   let stage = affinityStages[0];
   for (const s of affinityStages) {
@@ -317,7 +328,7 @@ export function gainAffinity(source, meta = {}) {
       after,
       leveled,
       stage: stageAfter,
-      line: leveled ? affinityLevelUpLines[stageAfter.id] || "" : "",
+      line: leveled ? pickLevelUpLine(stageAfter.id) : "",
     };
     if (!meta.silent) emit(event);
   }
