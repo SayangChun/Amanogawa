@@ -1,5 +1,5 @@
 import { saya } from "./data/saya.js";
-import { galleryPreview } from "./data/gallery-archive.js";
+import { pickGalleryPreview } from "./data/gallery-archive.js";
 import { quotesPreview } from "./data/quotes.js";
 import { notes } from "./data/notes.js";
 import { birthdayBannerCopy, isBirthday, daysUntilBirthday } from "./birthday.js";
@@ -18,6 +18,8 @@ import {
 
 const app = document.querySelector("#app");
 
+/** 首页精选：每次进入随机展示（与灯箱共用同一批） */
+const galleryPreview = pickGalleryPreview(5);
 const lightbox = createLightbox(() => galleryPreview);
 
 const renderBirthdayHome = () => {
@@ -183,7 +185,7 @@ const renderGallery = () => `
       <div>
         <p class="eyebrow">Gallery</p>
         <h2>精选图集</h2>
-        <p class="section-desc">首页只放几张官方代表作，更多 CG、社区同人与 AI 创作在完整图集里。</p>
+        <p class="section-desc">每次打开随机精选几张；更多 CG、社区同人与 AI 创作在完整图集里。</p>
       </div>
       <a class="btn btn-primary" href="./gallery.html">打开完整图集</a>
     </div>

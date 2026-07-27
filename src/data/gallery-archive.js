@@ -16,50 +16,6 @@ export const archiveFilters = [
   { id: "ai", label: "AI 创作" },
 ];
 
-/** 首页精选预览（保持轻量） */
-export const galleryPreview = [
-  {
-    id: "portrait",
-    title: "主立绘",
-    caption: "异色瞳在星光下微微发亮——蓝与橙，像夜空与暖灯。",
-    alt: "天之川沙夜 · 主立绘",
-    category: "立绘",
-    src: `${O}/saya-portrait.png`,
-  },
-  {
-    id: "if-summer",
-    title: "夏日制服",
-    caption: "IF 官方立绘：浅橙背心与蓝格裙。",
-    alt: "天之川沙夜 · 夏日制服",
-    category: "立绘",
-    src: `${O}/saya-if-summer.png`,
-  },
-  {
-    id: "fd-telescope",
-    title: "望远镜",
-    caption: "FINE DAYS 立绘：怀里的镜筒与蓝橙异瞳。",
-    alt: "天之川沙夜 · 望远镜立绘",
-    category: "立绘",
-    src: `${O}/saya-fd-telescope.png`,
-  },
-  {
-    id: "cg06",
-    title: "晴空之下",
-    caption: "风把银发扬起，异色瞳映着整片蓝天。",
-    alt: "天之川沙夜 · 官方 CG 晴空",
-    category: "CG",
-    src: `${O}/cg06-full.jpg`,
-  },
-  {
-    id: "cg-beach",
-    title: "海边刨冰",
-    caption: "IF 泳装 CG：廊下一点绿冰，只属于她。",
-    alt: "天之川沙夜 · 海边刨冰",
-    category: "CG",
-    src: `${O}/cg-if-beach-icecream.jpg`,
-  },
-];
-
 /** 图集页完整列表（不含 AI；AI 由文件夹 / 清单动态合并） */
 export const officialArchive = [
   {
@@ -769,3 +725,39 @@ export const communityArchive = [
     thumb: `${C}/community-desk-side.jpg`,
   },
 ];
+
+const PREVIEW_CATEGORY = {
+  "official-art": "立绘",
+  "official-cg": "CG",
+  community: "同人",
+  ai: "AI",
+};
+
+/** Fisher–Yates 打乱后取前 n 项 */
+function pickRandomItems(list, count) {
+  const arr = list.slice();
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, Math.min(count, arr.length));
+}
+
+/**
+ * 首页精选图集：从官方 + 社区图库随机抽取（每次进入页面可能不同）
+ * @param {number} [count=5]
+ */
+export function pickGalleryPreview(count = 5) {
+  const pool = [...officialArchive, ...communityArchive];
+  return pickRandomItems(pool, count).map((item) => ({
+    id: item.id,
+    title: item.title,
+    caption: item.caption,
+    alt: item.alt,
+    category: PREVIEW_CATEGORY[item.source] || item.badge || "精选",
+    src: item.src,
+  }));
+}
+
+/** 兼容旧引用：模块加载时随机一次；首页请优先用 pickGalleryPreview() */
+export const galleryPreview = pickGalleryPreview(5);
