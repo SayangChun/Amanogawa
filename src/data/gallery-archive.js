@@ -743,12 +743,22 @@ function pickRandomItems(list, count) {
   return arr.slice(0, Math.min(count, arr.length));
 }
 
+/** 是否为 Q 版人物（标题 / 说明 / id / 路径任一命中即排除） */
+function isQVersion(item) {
+  const hay = `${item.id} ${item.title} ${item.caption} ${item.alt} ${item.src || ""}`;
+  return /Q\s*版|[/_\-]q[/_\-]|q-saya|q-uniform|q-solo/i.test(hay);
+}
+
 /**
- * 首页精选图集：从官方 + 社区图库随机抽取（每次进入页面可能不同）
+ * 首页精选图集：仅官方立绘 + 官方 CG，排除 Q 版；每次进入随机抽取
  * @param {number} [count=5]
  */
 export function pickGalleryPreview(count = 5) {
-  const pool = [...officialArchive, ...communityArchive];
+  const pool = officialArchive.filter(
+    (item) =>
+      (item.source === "official-art" || item.source === "official-cg") &&
+      !isQVersion(item),
+  );
   return pickRandomItems(pool, count).map((item) => ({
     id: item.id,
     title: item.title,

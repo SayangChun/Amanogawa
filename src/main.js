@@ -185,7 +185,7 @@ const renderGallery = () => `
       <div>
         <p class="eyebrow">Gallery</p>
         <h2>精选图集</h2>
-        <p class="section-desc">每次打开随机精选几张；更多 CG、社区同人与 AI 创作在完整图集里。</p>
+        <p class="section-desc">每次打开随机精选官方立绘与 CG（不含 Q 版）；更多作品在完整图集里。</p>
       </div>
       <a class="btn btn-primary" href="./gallery.html">打开完整图集</a>
     </div>
